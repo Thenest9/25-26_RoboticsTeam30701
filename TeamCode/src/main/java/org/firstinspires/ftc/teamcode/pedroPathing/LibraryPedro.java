@@ -4,7 +4,6 @@ package org.firstinspires.ftc.teamcode.pedroPathing;
 //import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 //Import to be able to use the carousel, so you can get the balls to the flywheels
-import static android.os.SystemClock.sleep;
 
 //import com.pedropathing.util.Timer;
 import com.pedropathing.util.Timer;
@@ -20,14 +19,11 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 //Imports to be able to use Lists and ArrayLists; Used in getMotif()
-import java.util.List;
-import java.util.ArrayList;
 
 //Imports to use the Limelight; Used in getMotif() and positionToGoal
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.LLResultTypes;
-import com.qualcomm.hardware.limelightvision.LLStatus;
 
 //Import to use the gate servo, used for indexing
 import com.qualcomm.robotcore.hardware.DigitalChannel;
