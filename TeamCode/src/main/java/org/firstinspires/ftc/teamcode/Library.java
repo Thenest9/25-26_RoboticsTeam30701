@@ -884,4 +884,29 @@ public class Library
 
         setMotorsPower(0, 0, 0, 0);
     }
+
+    //Runs two tasks that are passed through as parameters
+    public void runTogether(Runnable run1, Runnable run2)
+    {
+        //2 thread objects that run the 2 tasks
+        Thread turnGoal = new Thread(run1);
+        Thread orderBalls = new Thread(run2);
+
+        //Starts both of the threads
+        turnGoal.start();
+        orderBalls.start();
+
+        //Joins the 2 threads back to the main thread
+        try
+        {
+            turnGoal.join();
+            orderBalls.join();
+        }
+        //If they have an error, it passes a error in the log
+        catch (InterruptedException e)
+        {
+            telemetry.addData("Joining Threads: ", "Failed");
+            telemetry.update();
+        }
+    }
 }
