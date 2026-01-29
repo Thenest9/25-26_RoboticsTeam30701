@@ -37,7 +37,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 
 
-public class Library
+public class LibraryPedro
 {
     //Making the DcMotors for the tires, the ramp, and the intake
     private DcMotor intake, ramp;
@@ -69,7 +69,7 @@ public class Library
     private Timer shootTimer;
     private Timer rampTimer;
 
-    public Library(DcMotorEx oR, DcMotorEx oL, CRServo c, Telemetry t, Limelight3A ll, DcMotor i, DcMotor r, Servo g, ColorSensor cs, DigitalChannel top, DigitalChannel bot)
+    public LibraryPedro(DcMotorEx oR, DcMotorEx oL, CRServo c, Telemetry t, Limelight3A ll, DcMotor i, DcMotor r, Servo g, ColorSensor cs, DigitalChannel top, DigitalChannel bot)
     {
         outputRight = oR;
         outputLeft = oL;
@@ -90,7 +90,7 @@ public class Library
 
     //Being able to make the Library object without having all the constructors at the cost of
     //passing through the reference objects for every call
-    public Library()
+    public LibraryPedro()
     {
 
     }

@@ -45,7 +45,7 @@ public class BaseStartBluePedro extends OpMode
     final double shooterD = 0;
     final double shooterF = 13.727;
 
-    Library lib;
+    LibraryPedro lib;
     private Follower follower;
     private Timer pathTimer, actionTimer, opmodeTimer;
     private int pathState; // Current autonomous path state (state machine)
@@ -275,7 +275,7 @@ public class BaseStartBluePedro extends OpMode
         buildPaths();
         follower.setStartingPose(startPose);
 
-        lib = new Library(outputRight, outputLeft, carousel, telemetry, limelight, intake, ramp, gate, colorSensor, touchSensorTop, touchSensorBot);
+        lib = new LibraryPedro(outputRight, outputLeft, carousel, telemetry, limelight, intake, ramp, gate, colorSensor, touchSensorTop, touchSensorBot);
 
     }
 
