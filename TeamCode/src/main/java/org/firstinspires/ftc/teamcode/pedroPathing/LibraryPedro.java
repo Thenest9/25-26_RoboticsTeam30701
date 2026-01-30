@@ -136,21 +136,23 @@ public class LibraryPedro
         intakeTimer.resetTimer();
         isIntaking = true;
     }
-    public void carouselStart() {
-        carousel.setPower(0.25);
-        carTimer.resetTimer();
-        isCarMoving = true;
-        ball++;
+    public void carouselStart()
+    {
+        if(isBall()) {
+            carousel.setPower(0.25);
+            carTimer.resetTimer();
+            isCarMoving = true;
+        }
+        else {
+            carousel.setPower(0);
+        }
     }
     public void endCarousel()
     {
-        if(isCarMoving)
+        if(carTimer.getElapsedTimeSeconds()>1.250)
         {
-            if(carTimer.getElapsedTimeSeconds()>1.250)
-            {
-                carousel.setPower(0);
-                isCarMoving=false;
-            }
+            carousel.setPower(0);
+            isCarMoving=false;
         }
     }
     public void finishIntake()
@@ -201,7 +203,7 @@ public class LibraryPedro
         {
             if (shootTimer.getElapsedTimeSeconds()>3.0)
             {
-                carousel.setPower(0.467);
+                carousel.setPower(0);
                 outputLeft.setVelocity(0);
                 outputRight.setVelocity(0);
                 isShooting = false;
@@ -210,11 +212,11 @@ public class LibraryPedro
     }
     public boolean isBall()
     {
-        if (checkRGB().equals("p") ||checkRGB().equals("g") )
+        if (!checkRGB().equals("n"))
         {
-          //chrck if there is a ball. if there is spin for an amount of time to nexct position
+          //check if there is a ball. if there is spin for an amount of time to nexct position
             //carouselStart();
-
+            ball++;
             return true;// if not do nothing, needs to stop at 3rd ball
         }
         else {
