@@ -64,7 +64,7 @@ public class LibraryPedro
     public boolean isCarMoving;
     private Timer intakeTimer;
     private Timer shootTimer;
-    private Timer rampTimer;
+    private Timer carTimer;
     private int ball;
 
     public LibraryPedro(DcMotorEx oR, DcMotorEx oL, CRServo c, Telemetry t, Limelight3A ll, DcMotor i, DcMotor r, Servo g, ColorSensor cs, DigitalChannel top, DigitalChannel bot)
@@ -83,7 +83,7 @@ public class LibraryPedro
 
         shootTimer = new Timer();
         intakeTimer = new Timer();
-        rampTimer = new Timer();
+        carTimer = new Timer();
     }
 
     //Being able to make the Library object without having all the constructors at the cost of
@@ -100,9 +100,9 @@ public class LibraryPedro
     {
         return intakeTimer.getElapsedTimeSeconds();
     }
-    public double getRampTimer()
+    public double getCarTimer()
     {
-        return rampTimer.getElapsedTimeSeconds();
+        return carTimer.getElapsedTimeSeconds();
     }
     public int getBallCount(){return ball;}
     public void initTimer()
@@ -114,9 +114,9 @@ public class LibraryPedro
         if(intakeTimer==null) {
             intakeTimer = new Timer();
         }
-        if(rampTimer==null)
+        if(carTimer==null)
         {
-            rampTimer= new Timer();
+            carTimer= new Timer();
         }
     }
 //    public void intakeProcess1()
@@ -126,7 +126,7 @@ public class LibraryPedro
 //    }
     public void IntakeStart()
     {
-        intake.setPower(0.1);
+        intake.setPower(1);
 //        carousel.setPower(0.2);
         ball=0;
 //        while(isBall())
@@ -137,19 +137,16 @@ public class LibraryPedro
         isIntaking = true;
     }
     public void carouselStart() {
-            if (ball<3)
-            {
-                carousel.setPower(0.25);
-                rampTimer.resetTimer();
-                isCarMoving = true;
-                ball++;
-            }
+        carousel.setPower(0.25);
+        carTimer.resetTimer();
+        isCarMoving = true;
+        ball++;
     }
     public void endCarousel()
     {
         if(isCarMoving)
         {
-            if(rampTimer.getElapsedTimeSeconds()>1.250)
+            if(carTimer.getElapsedTimeSeconds()>1.250)
             {
                 carousel.setPower(0);
                 isCarMoving=false;
@@ -160,7 +157,7 @@ public class LibraryPedro
     {
         if(isIntaking)
         {
-            if(intakeTimer.getElapsedTimeSeconds()>3.0)
+            if(intakeTimer.getElapsedTimeSeconds()>4)
             {
                 intake.setPower(0);
                 carousel.setPower(0.0);

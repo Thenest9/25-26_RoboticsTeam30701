@@ -295,8 +295,6 @@ public class BaseStartBluePedro extends OpMode
         telemetry.addData("isShooting:", lib.isIntaking);
         telemetry.addData("Motif", lib.getMotif());
         telemetry.addData("Bottom", touchSensorBot.getState());
-        telemetry.addData("Ramp Timer", lib.getRampTimer());
-        telemetry.addData("Ball Count: ", lib.getBallCount());
 
         telemetry.update();
     }
