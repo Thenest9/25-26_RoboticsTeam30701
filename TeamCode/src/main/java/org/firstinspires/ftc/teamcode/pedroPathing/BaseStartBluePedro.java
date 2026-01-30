@@ -146,11 +146,8 @@ public class BaseStartBluePedro extends OpMode
                 .build();
     }
 
-    public void autonomousPathUpdate() {
-
-        // Add your state machine Here
-        // Access paths with paths.pathName
-        // Refer to the Pedro Pathing Docs (Auto Example) for an example state machine
+    public void autonomousPathUpdate()
+    {
         switch (pathState)
         {
             case 0:
@@ -166,8 +163,9 @@ public class BaseStartBluePedro extends OpMode
                     setPathState(2);
                 }
                 break;
-//            case 2:
+            case 2:
 //                if(!follower.isBusy() && !lib.isShooting && pathTimer.getElapsedTimeSeconds()>3) {
+//                }
 //                    lib.rampDown();
 //                    follower.followPath(collect11, true);
 //                    lib.IntakeStart();//starts intake, brings ramp down.
@@ -293,7 +291,13 @@ public class BaseStartBluePedro extends OpMode
         follower.update(); // Update Pedro Pathing
         lib.updateShoot();
         lib.finishIntake();
-        lib.endCarousel();
+        if(lib.isIntaking && lib.isBall())
+        {
+            carousel.setPower(0.25);
+        }
+        else {
+            carousel.setPower(0);
+        }
 
         autonomousPathUpdate();
         drawDebug(follower);
