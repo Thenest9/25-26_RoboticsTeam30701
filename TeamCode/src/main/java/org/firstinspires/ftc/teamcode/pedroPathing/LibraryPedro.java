@@ -61,9 +61,11 @@ public class LibraryPedro
     DigitalChannel touchSensorTop;
     public boolean isShooting;
     public boolean isIntaking;
+    public boolean isCarMoving;
     private Timer intakeTimer;
     private Timer shootTimer;
     private Timer rampTimer;
+    private int ball;
 
     public LibraryPedro(DcMotorEx oR, DcMotorEx oL, CRServo c, Telemetry t, Limelight3A ll, DcMotor i, DcMotor r, Servo g, ColorSensor cs, DigitalChannel top, DigitalChannel bot)
     {
@@ -102,6 +104,7 @@ public class LibraryPedro
     {
         return rampTimer.getElapsedTimeSeconds();
     }
+    public int getBallCount(){return ball;}
     public void initTimer()
     {
         if(shootTimer==null)
@@ -123,17 +126,41 @@ public class LibraryPedro
 //    }
     public void IntakeStart()
     {
-        intake.setPower(1);
-        carousel.setPower(1);
-
-        intakeTimer.resetTimer();//TODO: create individual timers for shoot and intake
+        intake.setPower(0.1);
+//        carousel.setPower(0.2);
+        ball=0;
+//        while(isBall())
+//        {
+//            carouselStart();
+//        }
+        intakeTimer.resetTimer();
         isIntaking = true;
+    }
+    public void carouselStart() {
+            if (ball<3)
+            {
+                carousel.setPower(0.25);
+                rampTimer.resetTimer();
+                isCarMoving = true;
+                ball++;
+            }
+    }
+    public void endCarousel()
+    {
+        if(isCarMoving)
+        {
+            if(rampTimer.getElapsedTimeSeconds()>1.250)
+            {
+                carousel.setPower(0);
+                isCarMoving=false;
+            }
+        }
     }
     public void finishIntake()
     {
         if(isIntaking)
         {
-            if(intakeTimer.getElapsedTimeSeconds()>5.0)
+            if(intakeTimer.getElapsedTimeSeconds()>3.0)
             {
                 intake.setPower(0);
                 carousel.setPower(0.0);
@@ -155,7 +182,7 @@ public class LibraryPedro
     {
         while(touchSensorTop.getState())
         {
-            ramp.setPower(-0.5);
+            ramp.setPower(0.5);
             intake.setPower(1);
         }
             ramp.setPower(0);
@@ -177,11 +204,24 @@ public class LibraryPedro
         {
             if (shootTimer.getElapsedTimeSeconds()>3.0)
             {
-                carousel.setPower(0);
+                carousel.setPower(0.467);
                 outputLeft.setVelocity(0);
                 outputRight.setVelocity(0);
                 isShooting = false;
             }
+        }
+    }
+    public boolean isBall()
+    {
+        if (checkRGB().equals("p") ||checkRGB().equals("g") )
+        {
+          //chrck if there is a ball. if there is spin for an amount of time to nexct position
+            //carouselStart();
+
+            return true;// if not do nothing, needs to stop at 3rd ball
+        }
+        else {
+            return false;
         }
     }
 
@@ -223,6 +263,43 @@ public class LibraryPedro
         }
         return motif;
     }
+
+    //
+    //    //Checks what type of ball is there and returns a string depending on what is there
+        //g for a green ball
+        //p for a purple ball
+        //n for no ball
+    //    If the color sensor is pointing at the hole, it wont detect the balls color and would print n
+        private String checkRGB() {
+            int red = colorSensor.red();
+            int green = colorSensor.green();
+            int blue = colorSensor.blue();
+
+            //This else if statements checks if there is a purple ball there
+            //The red value for a purple ball is 2440 - 2445
+            //The green value for a purple ball is 2945 - 2960
+            //The blue value for a purple ball is 4945 - 4950
+            //Leaving a buffer of about 1000
+            if (blue >= 3000 && red >= 1750)
+            {
+                return "p";
+            }
+            //Prints out there is a green ball
+            //The red value for a green ball is 690 - 695
+            //The green value for a green ball is 2685 - 2690
+            //The blue value for a green ball is 1985 - 1990
+            //Leaving a buffer of about 100
+            else if(blue >= 1000)
+            {
+                return "g";
+            }
+
+            //This if statements checks if there is no ball there
+            //The red value for nothing there is 93 - 95
+            //The green value for nothing there is 151 - 154
+            //The blue value for nothing there is 137 - 139
+            return "n";
+        }
 
 //    public void orderBalls(String motif, String order)
 //    {
@@ -299,39 +376,3 @@ public class LibraryPedro
 //        //Returns the string filled with the correct order
 //        return order;
     }
-//
-//    //Checks what type of ball is there and returns a string depending on what is there
-    //g for a green ball
-    //p for a purple ball
-    //n for no ball
-    //If the color sensor is pointing at the hole, it wont detect the balls color and would print n
-//    private String checkRGB() {
-//        int red = colorSensor.red();
-//        int green = colorSensor.green();
-//        int blue = colorSensor.blue();
-//
-//        //This else if statements checks if there is a purple ball there
-//        //The red value for a purple ball is 2440 - 2445
-//        //The green value for a purple ball is 2945 - 2960
-//        //The blue value for a purple ball is 4945 - 4950
-//        //Leaving a buffer of about 1000
-//        if (blue >= 3000 && red >= 1750)
-//        {
-//            return "p";
-//        }
-//        //Prints out there is a green ball
-//        //The red value for a green ball is 690 - 695
-//        //The green value for a green ball is 2685 - 2690
-//        //The blue value for a green ball is 1985 - 1990
-//        //Leaving a buffer of about 100
-//        else if(blue >= 1000)
-//        {
-//            return "g";
-//        }
-//
-//        //This if statements checks if there is no ball there
-//        //The red value for nothing there is 93 - 95
-//        //The green value for nothing there is 151 - 154
-//        //The blue value for nothing there is 137 - 139
-//        return "n";
-//    }

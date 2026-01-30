@@ -2,6 +2,8 @@ package org.firstinspires.ftc.teamcode.pedroPathing;
 
 import static org.firstinspires.ftc.teamcode.pedroPathing.Drawing.drawDebug;
 
+import static java.lang.Thread.sleep;
+
 import com.pedropathing.geometry.BezierCurve;
 import com.pedropathing.paths.Path;
 import com.pedropathing.util.Timer;
@@ -40,10 +42,10 @@ public class BaseStartBluePedro extends OpMode
 
     //Making the gate to have the gate open or closed depending on intake or output
     Servo gate;
-    final double shooterP = 40.132;
-    final double shooterI = 0;
-    final double shooterD = 0;
-    final double shooterF = 13.727;
+    double shooterP = 48.72995;
+    double shooterI = 0;
+    double shooterD = 0;
+    double shooterF = 13.13319;
 
     LibraryPedro lib;
     private Follower follower;
@@ -56,7 +58,7 @@ public class BaseStartBluePedro extends OpMode
 
     public void buildPaths() {
         shootingPose = new Path(new BezierLine(new Pose(20.688, 122.492), new Pose(44.795,98.385)));
-        shootingPose.setLinearHeadingInterpolation(Math.toRadians(140), Math.toRadians(75));
+        shootingPose.setLinearHeadingInterpolation(Math.toRadians(140), Math.toRadians(140));
 
         path10 = follower.pathBuilder().addPath(
                         new BezierLine(
@@ -152,50 +154,42 @@ public class BaseStartBluePedro extends OpMode
         switch (pathState) {
             case 0:
                 follower.followPath(shootingPose);
-                lib.getMotif();
+                lib.shootThree(1267);
                 setPathState(1);
                 break;
-//            case 1:
-//                if(!follower.isBusy())
-//                {
-//                    follower.followPath(path10,true);
-//                    lib.shootThree(1267);
-//                    setPathState(2);
-//                }
-//                break;
             case 1:
                 if(!follower.isBusy() && !lib.isShooting && pathTimer.getElapsedTimeSeconds()>3) {
                     lib.rampDown();
                     follower.followPath(collect11, true);
-//                    lib.IntakeStart();//starts intake, brings ramp down.
+                    lib.IntakeStart();//starts intake, brings ramp down.
+                    setPathState(2);//moves onto next path
+                }
+                break;
+            case 2:
+                if(!follower.isBusy() && pathTimer.getElapsedTimeSeconds()>1)//checks if it stopped following previous path, checks if its been at leat 0.5 seconds
+                {
+                    follower.followPath(collect12, 0.67, true);//moves forward to collect 1st row of artifacts
                     setPathState(3);
                 }
                 break;
             case 3:
-                if(!follower.isBusy() && pathTimer.getElapsedTimeSeconds()>1)
+                if(!follower.isBusy() &&!lib.isIntaking && pathTimer.getElapsedTimeSeconds()>3)
                 {
-                    follower.followPath(collect12, 0.6, true);
+                    lib.rampUp();
+                    follower.followPath(collect1SP,true);
+                    lib.shootThree(1267);
                     setPathState(4);
                 }
-//                break;
-//            case 4:
-//                if(!follower.isBusy() && pathTimer.getElapsedTimeSeconds()>3)
-//                {
-//
-//                    follower.followPath(collect1SP,true);
-//                    lib.shootThree(1267);
-//                    setPathState(5);
-//                }
-//                break;
-//            case 5:
-//                if(!follower.isBusy()&& !lib.isShooting && pathTimer.getElapsedTimeSeconds()>3)
-//                {
-//                    lib.rampDown();
-//                    follower.followPath(collect21, true);
-//                    setPathState(6);
-//                }
-//                break;
-//            case 6:
+                break;
+            case 5:
+                if(!follower.isBusy()&& !lib.isShooting && pathTimer.getElapsedTimeSeconds()>3)
+                {
+                    lib.rampDown();
+                    follower.followPath(collect21, true);
+                    setPathState(6);
+                }
+                break;
+            case 6:
 //                if(!follower.isBusy() && pathTimer.getElapsedTimeSeconds()>1)
 //                {
 //                    follower.followPath(collect22,true);
@@ -286,6 +280,7 @@ public class BaseStartBluePedro extends OpMode
         follower.update(); // Update Pedro Pathing
         lib.updateShoot();
         lib.finishIntake();
+//        lib.endCarousel();
 
         autonomousPathUpdate();
         drawDebug(follower);
@@ -301,6 +296,7 @@ public class BaseStartBluePedro extends OpMode
         telemetry.addData("Motif", lib.getMotif());
         telemetry.addData("Bottom", touchSensorBot.getState());
         telemetry.addData("Ramp Timer", lib.getRampTimer());
+        telemetry.addData("Ball Count: ", lib.getBallCount());
 
         telemetry.update();
     }
