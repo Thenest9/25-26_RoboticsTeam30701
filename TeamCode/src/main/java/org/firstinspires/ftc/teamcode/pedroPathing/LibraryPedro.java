@@ -67,6 +67,11 @@ public class LibraryPedro
     private Timer shootTimer;
     private Timer carTimer;
     private int ball;
+    double shooterP = 48.72995;
+    double shooterI = 0;
+    double shooterD = 0;
+    double shooterF = 13.13319;
+
 
     public LibraryPedro(DcMotorEx oR, DcMotorEx oL, CRServo c, Telemetry t, Limelight3A ll, DcMotor i, DcMotor r, Servo g, ColorSensor cs, DigitalChannel top, DigitalChannel bot)
     {
@@ -106,6 +111,7 @@ public class LibraryPedro
     {
         return carTimer.getElapsedTimeSeconds();
     }
+
     public int getBallCount(){return ball;}
     public void initTimer()
     {
@@ -123,7 +129,7 @@ public class LibraryPedro
     }
     public void IntakeStart()
     {
-        intake.setPower(0.8);
+        intake.setPower(0.7);
         ball = 0;
         intakeTimer.resetTimer();
         carTimer.resetTimer();
@@ -136,7 +142,6 @@ public class LibraryPedro
             carousel.setPower(0.3);
             carTimer.resetTimer();
             isCarMoving = true;
-            carTimer.resetTimer();
         }
         else {
             carousel.setPower(0);
@@ -183,7 +188,12 @@ public class LibraryPedro
         intake.setPower(0);
     }
 
-    public void shootThree(int velocity) {
+    public void shootThree(int velocity)
+    {
+
+        outputRight.setVelocityPIDFCoefficients(shooterP, shooterI, shooterD, shooterF);
+        outputLeft.setVelocityPIDFCoefficients(shooterP, shooterI, shooterD, shooterF);
+
         outputRight.setVelocity(velocity);
         outputLeft.setVelocity(velocity);
         carousel.setPower(-1);

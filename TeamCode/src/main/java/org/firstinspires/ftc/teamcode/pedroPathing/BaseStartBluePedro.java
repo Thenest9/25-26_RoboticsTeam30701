@@ -59,7 +59,8 @@ public class BaseStartBluePedro extends OpMode
     public PathChain path9,path10;
 
 
-    public void buildPaths() {
+    public void buildPaths()
+    {
         shootingPose = new Path(new BezierLine(new Pose(20.688, 122.492), new Pose(44.795,98.385)));
         shootingPose.setLinearHeadingInterpolation(Math.toRadians(140), Math.toRadians(75));
 
@@ -68,7 +69,7 @@ public class BaseStartBluePedro extends OpMode
                                 new Pose(44.795, 98.385),
                                 new Pose(44.695, 98.385)
                         )
-                ).setLinearHeadingInterpolation(Math.toRadians(75), Math.toRadians(140))
+                ).setLinearHeadingInterpolation(Math.toRadians(75), Math.toRadians(145))
 
                 .build();
 
@@ -78,7 +79,7 @@ public class BaseStartBluePedro extends OpMode
 
                                 new Pose(44.795, 81.364)
                         )
-                ).setLinearHeadingInterpolation(Math.toRadians(140), Math.toRadians(180))
+                ).setLinearHeadingInterpolation(Math.toRadians(145), Math.toRadians(180))
 
                 .build();
 
@@ -183,7 +184,8 @@ public class BaseStartBluePedro extends OpMode
 //        }
 //    }
 
-    public void autonomousPathUpdate() {
+    public void autonomousPathUpdate()
+    {
 
         // Add your state machine Here
         // Access paths with paths.pathName
@@ -196,14 +198,16 @@ public class BaseStartBluePedro extends OpMode
                 setPathState(1);
                 break;
             case 1:
-                if(!follower.isBusy()) {
+                if(!follower.isBusy())
+                {
                     follower.followPath(path10, true);
                     lib.shootThree(1267);
                     setPathState(2);
                 }
                 break;
             case 2:
-                if(!follower.isBusy() && !lib.isShooting && pathTimer.getElapsedTimeSeconds()>3) {
+                if(!follower.isBusy() && !lib.isShooting && pathTimer.getElapsedTimeSeconds()>3)
+                {
                     lib.rampDown();
                     follower.followPath(collect11, true);
                     lib.IntakeStart();//starts intake, brings ramp down.
@@ -213,10 +217,6 @@ public class BaseStartBluePedro extends OpMode
             case 3:
                 if(!follower.isBusy() && pathTimer.getElapsedTimeSeconds()>1)//checks if it stopped following previous path, checks if its been at leat 0.5 seconds
                 {
-//                    runTogether(
-//                            ()-> turnCarouselWhileIntaking(),
-//                            ()-> follower.followPath(collect12, 0.4, true)//moves forward to collect 1st row of artifacts
-//                    );
                     follower.followPath(collect12, 0.5, true);
                     setPathState(4);
                 }
