@@ -60,7 +60,7 @@ public class LibraryPedro
     DigitalChannel touchSensorBot;
     DigitalChannel touchSensorTop;
     public boolean isShooting;
-    public boolean isIntaking;
+    public boolean isIntaking=false;
     public boolean isCarMoving;
     private Timer intakeTimer;
     private Timer shootTimer;
@@ -92,6 +92,7 @@ public class LibraryPedro
     {
 
     }
+
     public double getShootTimer()
     {
         return shootTimer.getElapsedTimeSeconds();
@@ -127,30 +128,31 @@ public class LibraryPedro
     public void IntakeStart()
     {
         intake.setPower(1);
-//        carousel.setPower(0.2);
-        ball=0;
+        ball = 0;
         intakeTimer.resetTimer();
         isIntaking = true;
     }
-
-
     public void carouselStart()
     {
-        while(isBall()) {
+        if(isBall())
+        {
             carousel.setPower(0.25);
-//            carTimer.resetTimer();
-//            isCarMoving = true;
+            carTimer.resetTimer();
+            isCarMoving = true;
         }
+        else {
             carousel.setPower(0);
+        }
+
     }
-//    public void endCarousel()
-//    {
-//        if(carTimer.getElapsedTimeSeconds()>1.250)
-//        {
-//            carousel.setPower(0);
-//            isCarMoving=false;
-//        }
-//    }
+    public void endCarousel()
+    {
+        if(carTimer.getElapsedTimeSeconds() > 1.250)
+        {
+            carousel.setPower(0);
+            isCarMoving=false;
+        }
+    }
     public void finishIntake()
     {
         if(isIntaking)
@@ -173,29 +175,27 @@ public class LibraryPedro
         intake.setPower(0.0);
 
     }
-    public void rampUp()
-    {
+    public void rampUp() {
         while(touchSensorTop.getState())
         {
             ramp.setPower(0.5);
             intake.setPower(1);
         }
-            ramp.setPower(0);
-            intake.setPower(0);
+        ramp.setPower(0);
+        intake.setPower(0);
     }
-    public void shootThree(int velocity)
-    {
+
+    public void shootThree(int velocity) {
         outputRight.setVelocity(velocity);
         outputLeft.setVelocity(velocity);
         carousel.setPower(-1);
         shootTimer.resetTimer();
         isShooting=true;
     }
-    public void updateShoot()
-    {
+    public void updateShoot() {
         if (isShooting)
         {
-            if (shootTimer.getElapsedTimeSeconds()>3.0)
+            if(shootTimer.getElapsedTimeSeconds() > 2.67)
             {
                 carousel.setPower(0);
                 outputLeft.setVelocity(0);
@@ -204,9 +204,12 @@ public class LibraryPedro
             }
         }
     }
+    public String getBallColor() {
+        return checkRGB();
+    }
     public boolean isBall()
     {
-        if (!checkRGB().equals("n"))
+        if(colorSensor.red()>55)
         {
           //check if there is a ball. if there is spin for an amount of time to nexct position
             //carouselStart();
