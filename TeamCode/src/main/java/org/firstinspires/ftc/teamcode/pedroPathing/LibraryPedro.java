@@ -62,6 +62,7 @@ public class LibraryPedro
     public boolean isShooting;
     public boolean isIntaking=false;
     public boolean isCarMoving;
+
     private Timer intakeTimer;
     private Timer shootTimer;
     private Timer carTimer;
@@ -120,25 +121,22 @@ public class LibraryPedro
             carTimer= new Timer();
         }
     }
-//    public void intakeProcess1()
-//    {
-//        rampDown();
-//        IntakeStart();
-//    }
     public void IntakeStart()
     {
-        intake.setPower(1);
+        intake.setPower(0.8);
         ball = 0;
         intakeTimer.resetTimer();
+        carTimer.resetTimer();
         isIntaking = true;
     }
     public void carouselStart()
     {
-        if(isBall())
+        if(isBall() && carTimer.getElapsedTimeSeconds()<1.25)//
         {
-            carousel.setPower(0.25);
+            carousel.setPower(0.3);
             carTimer.resetTimer();
             isCarMoving = true;
+            carTimer.resetTimer();
         }
         else {
             carousel.setPower(0);
@@ -157,7 +155,7 @@ public class LibraryPedro
     {
         if(isIntaking)
         {
-            if(intakeTimer.getElapsedTimeSeconds()>4)
+            if(intakeTimer.getElapsedTimeSeconds()>6)
             {
                 intake.setPower(0);
                 carousel.setPower(0.0);

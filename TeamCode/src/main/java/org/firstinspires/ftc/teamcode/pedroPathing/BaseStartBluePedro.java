@@ -66,7 +66,6 @@ public class BaseStartBluePedro extends OpMode
         path10 = follower.pathBuilder().addPath(
                         new BezierLine(
                                 new Pose(44.795, 98.385),
-
                                 new Pose(44.695, 98.385)
                         )
                 ).setLinearHeadingInterpolation(Math.toRadians(75), Math.toRadians(140))
@@ -87,7 +86,7 @@ public class BaseStartBluePedro extends OpMode
                         new BezierLine(
                                 new Pose(44.795, 81.364),
 
-                                new Pose(20.000, 81.159)
+                                new Pose(16.000, 81.159)
                         )
                 ).setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(180))
 
@@ -95,7 +94,7 @@ public class BaseStartBluePedro extends OpMode
 
         collect1SP = follower.pathBuilder().addPath(
                         new BezierLine(
-                                new Pose(20.000, 81.159),
+                                new Pose(16.000, 81.159),
 
                                 new Pose(44.795, 98.385)
                         )
@@ -148,41 +147,41 @@ public class BaseStartBluePedro extends OpMode
 
                 .build();
     }
-    public void turnCarouselWhileIntaking()
-    {
-        while(lib.isIntaking) {
-            if (colorSensor.blue() >= 1000) {
-                Timer timer = new Timer();
-                carousel.setPower(0.25);
-                if (timer.getElapsedTime() > 1) {
-                    carousel.setPower(0);
-                }
-            }
-        }
-    }
-    public void runTogether(Runnable run1, Runnable run2)
-    {
-        //2 thread objects that run the 2 tasks
-        Thread turnGoal = new Thread(run1);
-        Thread orderBalls = new Thread(run2);
-
-        //Starts both of the threads
-        turnGoal.start();
-        orderBalls.start();
-
-        //Joins the 2 threads back to the main thread
-        try
-        {
-            turnGoal.join();
-            orderBalls.join();
-        }
-        //If they have an error, it passes a error in the log
-        catch (InterruptedException e)
-        {
-            telemetry.addData("Joining Threads: ", "Failed");
-            telemetry.update();
-        }
-    }
+//    public void turnCarouselWhileIntaking()
+//    {
+//        while(lib.isIntaking) {
+//            if (colorSensor.blue() >= 1000) {
+//                Timer timer = new Timer();
+//                carousel.setPower(0.25);
+//                if (timer.getElapsedTime() > 1) {
+//                    carousel.setPower(0);
+//                }
+//            }
+//        }
+//    }
+//    public void runTogether(Runnable run1, Runnable run2)
+//    {
+//        //2 thread objects that run the 2 tasks
+//        Thread turnGoal = new Thread(run1);
+//        Thread orderBalls = new Thread(run2);
+//
+//        //Starts both of the threads
+//        turnGoal.start();
+//        orderBalls.start();
+//
+//        //Joins the 2 threads back to the main thread
+//        try
+//        {
+//            turnGoal.join();
+//            orderBalls.join();
+//        }
+//        //If they have an error, it passes a error in the log
+//        catch (InterruptedException e)
+//        {
+//            telemetry.addData("Joining Threads: ", "Failed");
+//            telemetry.update();
+//        }
+//    }
 
     public void autonomousPathUpdate() {
 
@@ -218,23 +217,23 @@ public class BaseStartBluePedro extends OpMode
 //                            ()-> turnCarouselWhileIntaking(),
 //                            ()-> follower.followPath(collect12, 0.4, true)//moves forward to collect 1st row of artifacts
 //                    );
-                    follower.followPath(collect12, 0.4, true);
+                    follower.followPath(collect12, 0.5, true);
                     setPathState(4);
                 }
                 break;
-//            case 4:
-//                if(follower.isBusy())
-//                {
-//                    lib.carouselStart();
-//                }
-//                if(!follower.isBusy() &&!lib.isIntaking && pathTimer.getElapsedTimeSeconds()>3)
-//                {
-//                    lib.rampUp();
-//                    follower.followPath(collect1SP,true);
-//                    lib.shootThree(1267);
-//                    setPathState(5);
-//                }
-//                break;
+            case 4:
+                if(!follower.isBusy() && !lib.isIntaking && pathTimer.getElapsedTimeSeconds()>3)
+                {
+                    actionTimer.resetTimer();
+                    if(actionTimer.getElapsedTimeSeconds()>0.5)
+                    {
+                        lib.rampUp();
+                    }
+                        follower.followPath(collect1SP, true);
+                        lib.shootThree(1267);
+                    setPathState(5);
+                }
+                break;
 //            case 5:
 //                if(!follower.isBusy()&& !lib.isShooting && pathTimer.getElapsedTimeSeconds()>3)
 //                {
@@ -317,6 +316,7 @@ public class BaseStartBluePedro extends OpMode
 
         pathTimer = new Timer();
         opmodeTimer = new Timer();
+        actionTimer =  new Timer();
         opmodeTimer.resetTimer();
 
         follower = Constants.createFollower((hardwareMap));
@@ -329,17 +329,19 @@ public class BaseStartBluePedro extends OpMode
 
 
     @Override
-    public void loop()
+    public void loop()//runs 50 times a second
     {
         follower.update(); // Update Pedro Pathing
         lib.updateShoot();
         lib.finishIntake();
-        if(lib.isIntaking && lib.getBallCount()!=2)
+        if(lib.isIntaking)
         {
             if(lib.isBall()) {
                 lib.carouselStart();
             }
-            lib.endCarousel();
+            else {
+                carousel.setPower(0);
+            }
         }
 
         autonomousPathUpdate();
