@@ -40,19 +40,21 @@ public class BaseStartRedPedro extends OpMode
 
     //Making the gate to have the gate open or closed depending on intake or output
     Servo gate;
-    final double shooterP = 40.132;
-    final double shooterI = 0;
-    final double shooterD = 0;
-    final double shooterF = 13.727;
+    double shooterP = 48.72995;
+    double shooterI = 0;
+    double shooterD = 0;
+    double shooterF = 13.13319;
 
     LibraryPedro lib;
     private Follower follower;
-    private Timer pathTimer, opmodeTimer;
+    private Timer pathTimer, actionTimer, opmodeTimer;
     private int pathState; // Current autonomous path state (state machine)
-    private final Pose startPose= new Pose(20.688, 122.492, Math.toRadians(140));
+    private final Pose startPose= new Pose(122.69701280227595, 123.92603129445234, Math.toRadians(36));
     public Path shootingPose;
     public PathChain collect11, collect12, collect1SP, collect21, collect22, collect23, collect2SP;
     public PathChain path9, shootAngle;
+
+    public String currMotif;
 
     public void buildPaths()
     {
@@ -136,6 +138,7 @@ public class BaseStartRedPedro extends OpMode
                                 new Pose(125.000, 70.000)
                         )
                 ).setLinearHeadingInterpolation(Math.toRadians(40), Math.toRadians(270))
+
                 .build();
     }
 
@@ -145,19 +148,20 @@ public class BaseStartRedPedro extends OpMode
         {
             case 0:
                 follower.followPath(shootingPose);
-                lib.getMotif();
+                currMotif = lib.getMotif();
                 setPathState(1);
                 break;
             case 1:
                 if(!follower.isBusy())
                 {
                     follower.followPath(shootAngle,true);
-                    lib.shootThree(1267);
+                    lib.orderBalls(currMotif, "ppg");
+                    lib.shootThree(1367);
                     setPathState(2);
                 }
                 break;
             case 2:
-                if(!follower.isBusy() && !lib.isShooting && pathTimer.getElapsedTimeSeconds()>2) {
+                if(!follower.isBusy() && !lib.isShooting && pathTimer.getElapsedTimeSeconds()>6) {
                     lib.rampDown();
                     follower.followPath(collect11, true);
                     lib.IntakeStart();//ramp moves down, intake starts spinning, carousel spins continously
@@ -174,42 +178,48 @@ public class BaseStartRedPedro extends OpMode
             case 4:
                 if(!follower.isBusy() && !lib.isIntaking && pathTimer.getElapsedTimeSeconds()>1)
                 {
-                    lib.rampUp();
-                    follower.followPath(collect1SP,true);
-                    lib.shootThree(1267);
-                    setPathState(5);
+                    actionTimer.resetTimer();
+                    if(actionTimer.getElapsedTimeSeconds()>0.5)
+                    {
+                        lib.rampUp();
+                    }
+                    lib.runTogether(//TEST
+                            ()-> lib.orderBalls(currMotif, "gpp"),
+                            ()->follower.followPath(collect1SP, true)
+                    );
+                    lib.shootThree(1367);
                 }
                 break;
             case 5:
                 if(!follower.isBusy()&& !lib.isShooting && pathTimer.getElapsedTimeSeconds()>3)
                 {
+                    lib.rampDown();
                     follower.followPath(collect21, true);
 //                    lib.Intake();//starts intake, brings ramp down
                     setPathState(6);
                 }
                 break;
-            case 6:
-                if(!follower.isBusy() && pathTimer.getElapsedTimeSeconds()>0.5)
-                {
-                    follower.followPath(collect22,true);
-//                    lib.finishIntake();//stops intake, brings ramp up until it hits sensor, stops carousel
-                    setPathState(7);
-                }
-                break;
-            case 7:
-                if(!follower.isBusy() && !lib.isIntaking && pathTimer.getElapsedTimeSeconds()>1)
-                {
-                    follower.followPath(collect2SP,true);
-                    lib.shootThree(1267);
-                    setPathState(9);
-                    }
-                    break;
-            case 9:
-                if (!follower.isBusy() && !lib.isShooting && pathTimer.getElapsedTimeSeconds()>3)
-                {
-                    follower.followPath(path9, true);
-                }
-                break;
+//            case 6:
+//                if(!follower.isBusy() && pathTimer.getElapsedTimeSeconds()>0.5)
+//                {
+//                    follower.followPath(collect22,true);
+//                    setPathState(7);
+//                }
+//                break;
+////            case 7:
+//                if(!follower.isBusy() && !lib.isIntaking && pathTimer.getElapsedTimeSeconds()>1)
+//                {
+//                    follower.followPath(collect2SP,true);
+//                    lib.shootThree(1267);
+//                    setPathState(9);
+//                    }
+//                    break;
+//            case 9:
+//                if (!follower.isBusy() && !lib.isShooting && pathTimer.getElapsedTimeSeconds()>3)
+//                {
+//                    follower.followPath(path9, true);
+//                }
+//                break;
             }
     }
     public void setPathState(int pState) {
@@ -217,6 +227,7 @@ public class BaseStartRedPedro extends OpMode
         pathTimer.resetTimer();
     }
 
+    @Override
     public void init()
     {
         // Initialize the right wheel of the fly wheel
@@ -262,6 +273,7 @@ public class BaseStartRedPedro extends OpMode
 
         pathTimer = new Timer();
         opmodeTimer = new Timer();
+        actionTimer =  new Timer();
         opmodeTimer.resetTimer();
 
         follower = Constants.createFollower((hardwareMap));
@@ -271,11 +283,24 @@ public class BaseStartRedPedro extends OpMode
         lib = new LibraryPedro(outputRight, outputLeft, carousel, telemetry, limelight, intake, ramp, gate, colorSensor, touchSensorTop, touchSensorBot);
 
     }
-    public void loop()
+
+
+    @Override
+    public void loop()//runs about 50 times a second
     {
         follower.update(); // Update Pedro Pathing
         lib.updateShoot();
         lib.finishIntake();
+        if(lib.isIntaking)
+        {
+            if(lib.isBall()) {
+                lib.carouselStart();
+            }
+            else
+            {
+                carousel.setPower(0);
+            }
+        }
 
         autonomousPathUpdate();
         drawDebug(follower);
@@ -284,11 +309,17 @@ public class BaseStartRedPedro extends OpMode
         telemetry.addData("x", follower.getPose().getX());
         telemetry.addData("y", follower.getPose().getY());
         telemetry.addData("heading", follower.getPose().getHeading());
-        telemetry.addData("lib timer: ", lib.getShootTimer());
+        telemetry.addData("Shoot timer: ", lib.getShootTimer());
         telemetry.addData("isShooting:", lib.isShooting);
-        telemetry.addData("lib timer: ", lib.getIntakeTimer());
-        telemetry.addData("isShooting:", lib.isIntaking);
-        telemetry.addData("Motif", lib.getMotif());
+        telemetry.addData("intake timer: ", lib.getIntakeTimer());
+        telemetry.addData("Carousel timer: ", lib.getCarTimer());
+        telemetry.addData("isIntaking:", lib.isIntaking);
+        telemetry.addData("Motif", "hi");
+        telemetry.addData("Bottom", touchSensorBot.getState());
+        telemetry.addData("Is Ball:", lib.isBall());
+        telemetry.addData("Ball count:", lib.getBallCount());
+        telemetry.addData("Ball Color:", lib.getBallColor());
+
         telemetry.update();
     }
     public void start()
