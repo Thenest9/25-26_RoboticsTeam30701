@@ -49,7 +49,7 @@ public class BaseStartRedPedro extends OpMode
     private Follower follower;
     private Timer pathTimer, actionTimer, opmodeTimer;
     private int pathState; // Current autonomous path state (state machine)
-    private final Pose startPose= new Pose(20.688, 122.492, Math.toRadians(140));
+    private final Pose startPose= new Pose(122.69701280227595, 123.92603129445234, Math.toRadians(36));
     public Path shootingPose;
     public PathChain collect11, collect12, collect1SP, collect21, collect22, collect23, collect2SP;
     public PathChain path9, shootAngle;
