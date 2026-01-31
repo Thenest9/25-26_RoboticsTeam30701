@@ -58,6 +58,8 @@ public class BaseStartBluePedro extends OpMode
     public PathChain collect11, collect12, collect1SP, collect21, collect22, collect23, collect2SP;
     public PathChain path9,path10;
 
+    public String currMotif;
+
 
     public void buildPaths()
     {
@@ -70,23 +72,19 @@ public class BaseStartBluePedro extends OpMode
                                 new Pose(44.695, 98.385)
                         )
                 ).setLinearHeadingInterpolation(Math.toRadians(75), Math.toRadians(145))
-
                 .build();
 
         collect11 = follower.pathBuilder().addPath(
                         new BezierLine(
                                 new Pose(44.695, 98.385),
-
-                                new Pose(44.795, 81.364)
+                                new Pose(44.695, 81.364)
                         )
                 ).setLinearHeadingInterpolation(Math.toRadians(145), Math.toRadians(180))
-
                 .build();
 
         collect12 = follower.pathBuilder().addPath(
                         new BezierLine(
-                                new Pose(44.795, 81.364),
-
+                                new Pose(44.695, 81.364),
                                 new Pose(16.000, 81.159)
                         )
                 ).setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(180))
@@ -97,9 +95,9 @@ public class BaseStartBluePedro extends OpMode
                         new BezierLine(
                                 new Pose(16.000, 81.159),
 
-                                new Pose(44.795, 98.385)
+                                new Pose(44.695, 98.385)
                         )
-                ).setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(140))
+                ).setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(145))
 
                 .build();
 
@@ -109,7 +107,7 @@ public class BaseStartBluePedro extends OpMode
 
                                 new Pose(44.795, 57.354)
                         )
-                ).setLinearHeadingInterpolation(Math.toRadians(140), Math.toRadians(180))
+                ).setLinearHeadingInterpolation(Math.toRadians(145), Math.toRadians(180))
 
                 .build();
 
@@ -148,41 +146,7 @@ public class BaseStartBluePedro extends OpMode
 
                 .build();
     }
-//    public void turnCarouselWhileIntaking()
-//    {
-//        while(lib.isIntaking) {
-//            if (colorSensor.blue() >= 1000) {
-//                Timer timer = new Timer();
-//                carousel.setPower(0.25);
-//                if (timer.getElapsedTime() > 1) {
-//                    carousel.setPower(0);
-//                }
-//            }
-//        }
-//    }
-//    public void runTogether(Runnable run1, Runnable run2)
-//    {
-//        //2 thread objects that run the 2 tasks
-//        Thread turnGoal = new Thread(run1);
-//        Thread orderBalls = new Thread(run2);
-//
-//        //Starts both of the threads
-//        turnGoal.start();
-//        orderBalls.start();
-//
-//        //Joins the 2 threads back to the main thread
-//        try
-//        {
-//            turnGoal.join();
-//            orderBalls.join();
-//        }
-//        //If they have an error, it passes a error in the log
-//        catch (InterruptedException e)
-//        {
-//            telemetry.addData("Joining Threads: ", "Failed");
-//            telemetry.update();
-//        }
-//    }
+
 
     public void autonomousPathUpdate()
     {
@@ -194,23 +158,24 @@ public class BaseStartBluePedro extends OpMode
         {
             case 0:
                 follower.followPath(shootingPose);
-                lib.getMotif();
+                currMotif = lib.getMotif();
                 setPathState(1);
                 break;
             case 1:
                 if(!follower.isBusy())
                 {
                     follower.followPath(path10, true);
-                    lib.shootThree(1267);
+                    lib.orderBalls(currMotif, "ppg");
+                    lib.shootThree(1367);
                     setPathState(2);
                 }
                 break;
             case 2:
-                if(!follower.isBusy() && !lib.isShooting && pathTimer.getElapsedTimeSeconds()>3)
+                if(!follower.isBusy() && !lib.isShooting && pathTimer.getElapsedTimeSeconds()>6)
                 {
                     lib.rampDown();
-                    follower.followPath(collect11, true);
-                    lib.IntakeStart();//starts intake, brings ramp down.
+                    follower.followPath(collect11, true);//infront of row 1 to intake
+                    lib.IntakeStart();//starts intake
                     setPathState(3);//moves onto next path
                 }
                 break;
@@ -229,19 +194,22 @@ public class BaseStartBluePedro extends OpMode
                     {
                         lib.rampUp();
                     }
-                        follower.followPath(collect1SP, true);
-                        lib.shootThree(1267);
+                    lib.runTogether(//TEST
+                            ()-> lib.orderBalls(currMotif, "gpp"),
+                            ()->follower.followPath(collect1SP, true)
+                    );
+                    lib.shootThree(1367);
                     setPathState(5);
                 }
                 break;
-//            case 5:
-//                if(!follower.isBusy()&& !lib.isShooting && pathTimer.getElapsedTimeSeconds()>3)
-//                {
-//                    lib.rampDown();
-//                    follower.followPath(collect21, true);
-//                    setPathState(6);
-//                }
-//                break;
+            case 5://will end auto, set drivers up to intake, ramop will be down when this ends.
+                if(!follower.isBusy()&& !lib.isShooting && pathTimer.getElapsedTimeSeconds()>3)
+                {
+                    lib.rampDown();
+                    follower.followPath(collect21, true);
+                    setPathState(6);
+                }
+                break;
 //            case 6:
 //                if(!follower.isBusy() && pathTimer.getElapsedTimeSeconds()>1)
 //                {
@@ -329,7 +297,7 @@ public class BaseStartBluePedro extends OpMode
 
 
     @Override
-    public void loop()//runs 50 times a second
+    public void loop()//runs about 50 times a second
     {
         follower.update(); // Update Pedro Pathing
         lib.updateShoot();
@@ -339,7 +307,8 @@ public class BaseStartBluePedro extends OpMode
             if(lib.isBall()) {
                 lib.carouselStart();
             }
-            else {
+            else
+            {
                 carousel.setPower(0);
             }
         }
@@ -351,18 +320,16 @@ public class BaseStartBluePedro extends OpMode
         telemetry.addData("x", follower.getPose().getX());
         telemetry.addData("y", follower.getPose().getY());
         telemetry.addData("heading", follower.getPose().getHeading());
-        telemetry.addData("lib timer: ", lib.getShootTimer());
+        telemetry.addData("Shoot timer: ", lib.getShootTimer());
         telemetry.addData("isShooting:", lib.isShooting);
-        telemetry.addData("lib timer: ", lib.getIntakeTimer());
-        telemetry.addData("isShooting:", lib.isIntaking);
-        telemetry.addData("Motif", lib.getMotif());
+        telemetry.addData("intake timer: ", lib.getIntakeTimer());
+        telemetry.addData("Carousel timer: ", lib.getCarTimer());
+        telemetry.addData("isIntaking:", lib.isIntaking);
+        telemetry.addData("Motif", currMotif);
         telemetry.addData("Bottom", touchSensorBot.getState());
         telemetry.addData("Is Ball:", lib.isBall());
         telemetry.addData("Ball count:", lib.getBallCount());
         telemetry.addData("Ball Color:", lib.getBallColor());
-        telemetry.addData("Red", colorSensor.red());
-        telemetry.addData("Blue", colorSensor.blue());
-        telemetry.addData("Green", colorSensor.green());
 
         telemetry.update();
     }

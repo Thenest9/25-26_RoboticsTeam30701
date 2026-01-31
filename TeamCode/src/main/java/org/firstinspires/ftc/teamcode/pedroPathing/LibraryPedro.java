@@ -66,6 +66,7 @@ public class LibraryPedro
     private Timer intakeTimer;
     private Timer shootTimer;
     private Timer carTimer;
+    private Timer orderTimer;
     private int ball;
     double shooterP = 48.72995;
     double shooterI = 0;
@@ -90,6 +91,7 @@ public class LibraryPedro
         shootTimer = new Timer();
         intakeTimer = new Timer();
         carTimer = new Timer();
+        orderTimer = new Timer();
     }
 
     //Being able to make the Library object without having all the constructors at the cost of
@@ -137,13 +139,15 @@ public class LibraryPedro
     }
     public void carouselStart()
     {
+        carTimer.resetTimer();
         if(isBall() && carTimer.getElapsedTimeSeconds()<1.25)//
         {
             carousel.setPower(0.3);
-            carTimer.resetTimer();
             isCarMoving = true;
         }
-        else {
+        else
+        {
+            carTimer.resetTimer();
             carousel.setPower(0);
         }
 
@@ -156,7 +160,7 @@ public class LibraryPedro
             isCarMoving=false;
         }
     }
-    public void finishIntake()
+    public void finishIntake()//called in the loop function, continously checks
     {
         if(isIntaking)
         {
@@ -190,7 +194,6 @@ public class LibraryPedro
 
     public void shootThree(int velocity)
     {
-
         outputRight.setVelocityPIDFCoefficients(shooterP, shooterI, shooterD, shooterF);
         outputLeft.setVelocityPIDFCoefficients(shooterP, shooterI, shooterD, shooterF);
 
@@ -200,7 +203,8 @@ public class LibraryPedro
         shootTimer.resetTimer();
         isShooting=true;
     }
-    public void updateShoot() {
+    public void updateShoot()
+    {
         if (isShooting)
         {
             if(shootTimer.getElapsedTimeSeconds() > 2.67)
@@ -217,7 +221,7 @@ public class LibraryPedro
     }
     public boolean isBall()
     {
-        if(colorSensor.red()>55)
+        if(colorSensor.red()>40)
         {
           //check if there is a ball. if there is spin for an amount of time to nexct position
             //carouselStart();
@@ -304,39 +308,57 @@ public class LibraryPedro
             //The blue value for nothing there is 137 - 139
             return "n";
         }
+    public void runTogether(Runnable run1, Runnable run2)
+    {
+        //2 thread objects that run the 2 tasks
+        Thread moveGoal = new Thread(run1);
+        Thread orderBalls = new Thread(run2);
 
-//    public void orderBalls(String motif, String order)
-//    {
-//        //Moves the gate to the front area of the carousel, the values are absolute
-//        gate.setPosition(0.67);
-//
-//        telemetry.addData("Motif: ", motif);
-//        telemetry.addData("Order: ", order);
-//        telemetry.update();
-//
-//        if(orderPossible(order))
-//        {
-//            while(!motif.equals(order))
-//            {
-//                //Spins the carousel to the next section
-//                carousel.setPower(0.25);
-//                opMode.sleep(1250);
-//
-//                //Stops the carousel from spinning
-//                carousel.setPower(0);
-//                opMode.sleep(1000);
-//
-//                //Move the last item in the string to the front
-//                order = order.substring(2) + order.substring(0,2);
-//            }
-//        }
-//        telemetry.addData("Motif: ", motif);
-//        telemetry.addData("Order: ", order);
-//        telemetry.addData("Is It Possible: ", orderPossible(order));
-//        telemetry.update();
-//
-//        gate.setPosition(0.95);
-//    }
+        //Starts both of the threads
+        moveGoal.start();
+        orderBalls.start();
+
+        //Joins the 2 threads back to the main thread
+        try
+        {
+            moveGoal.join();
+            orderBalls.join();
+        }
+        //If they have an error, it passes a error in the log
+        catch (InterruptedException e)
+        {
+            telemetry.addData("Joining Threads: ", "Failed");
+            telemetry.update();
+        }
+    }
+    public void orderBalls(String motif, String order)
+    {
+        //Moves the gate to the front area of the carousel, the values are absolute
+        gate.setPosition(0.67);
+
+        telemetry.addData("Motif: ", motif);
+        telemetry.addData("Order: ", order);
+        telemetry.update();
+
+            while(!motif.equals(order))
+            {
+                //Spins the carousel to the next section
+                orderTimer.resetTimer();
+                while(orderTimer.getElapsedTimeSeconds()<1.25) {
+                    carousel.setPower(0.25);
+                }
+                    //Stops the carousel from spinning
+                    carousel.setPower(0);
+
+                //Move the last item in the string to the front
+                order = order.substring(2) + order.substring(0,2);
+            }
+        telemetry.addData("Motif: ", motif);
+        telemetry.addData("Order: ", order);
+        telemetry.update();
+
+        gate.setPosition(0.95);
+    }
 //
 //    private boolean orderPossible(String order)
 //    {
