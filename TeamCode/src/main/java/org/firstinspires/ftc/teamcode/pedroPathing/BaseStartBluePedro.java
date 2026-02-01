@@ -53,7 +53,7 @@ public class BaseStartBluePedro extends OpMode
     private Follower follower;
     private Timer pathTimer, actionTimer, opmodeTimer , motifTimer;
     private int pathState; // Current autonomous path state (state machine)
-    private final Pose startPose= new Pose(20.688, 122.492, Math.toRadians(140));
+    private final Pose startPose= new Pose(20.688, 122.492, Math.toRadians(145));
     public Path shootingPose;
     public PathChain collect11, collect12, collect1SP, collect21, collect22, collect23, collect2SP;
     public PathChain path9,path10;
@@ -64,7 +64,7 @@ public class BaseStartBluePedro extends OpMode
     public void buildPaths()
     {
         shootingPose = new Path(new BezierLine(new Pose(20.688, 122.492), new Pose(44.795,98.385)));
-        shootingPose.setLinearHeadingInterpolation(Math.toRadians(140), Math.toRadians(75));
+        shootingPose.setLinearHeadingInterpolation(Math.toRadians(145), Math.toRadians(75));
 
         path10 = follower.pathBuilder().addPath(
                         new BezierLine(
@@ -85,7 +85,7 @@ public class BaseStartBluePedro extends OpMode
         collect12 = follower.pathBuilder().addPath(
                         new BezierLine(
                                 new Pose(44.695, 81.364),
-                                new Pose(15.500, 81.159)
+                                new Pose(16.000, 81.159)
                         )
                 ).setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(180))
 
@@ -93,11 +93,11 @@ public class BaseStartBluePedro extends OpMode
 
         collect1SP = follower.pathBuilder().addPath(
                         new BezierLine(
-                                new Pose(15.500, 81.159),
+                                new Pose(16.000, 81.159),
 
                                 new Pose(44.695, 98.385)
                         )
-                ).setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(150))
+                ).setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(145))
 
                 .build();
 
@@ -174,21 +174,24 @@ public class BaseStartBluePedro extends OpMode
 //                    }
 //                    lib.orderBalls(currMotif, "ppg");
 
-                    lib.shootThree(1280);
+//                    lib.shootThree(1280);
                     setPathState(2);
                 }
                 break;
             case 2:
-                if(!follower.isBusy() && !lib.isShooting && pathTimer.getElapsedTimeSeconds()>4)
+                if(!follower.isBusy())
                 {
-                    lib.rampDown();
-                    follower.followPath(collect11, true);//infront of row 1 to intake
-                    lib.IntakeStart();//starts intake
-                    setPathState(3);//moves onto next path
+                    lib.shootThree(1300);
+                    if (!lib.isShooting) {
+                        lib.rampDown();
+                        follower.followPath(collect11, true);//infront of row 1 to intake
+                        lib.IntakeStart();//starts intake
+                        setPathState(3);//moves onto next path
+                    }
                 }
                 break;
             case 3:
-                if(!follower.isBusy() && pathTimer.getElapsedTimeSeconds()>1)//checks if it stopped following previous path, checks if its been at leat 0.5 seconds
+                if(!follower.isBusy() && pathTimer.getElapsedTimeSeconds()>2 )//checks if it stopped following previous path, checks if its been at leat 0.5 seconds
                 {
                     follower.followPath(collect12, 0.5, true);
                     setPathState(4);
@@ -220,7 +223,7 @@ public class BaseStartBluePedro extends OpMode
                 break;
             case 5://will end auto, set drivers up to intake, ramop will be down when this ends.
             if(!follower.isBusy()) {//if it stopped moving on the path shoot
-                lib.shootThree(1367);
+                lib.shootThree(1300);
             }
 //                if(!follower.isBusy()&& !lib.isShooting && pathTimer.getElapsedTimeSeconds()>3)
 //                {
@@ -359,6 +362,7 @@ public class BaseStartBluePedro extends OpMode
         telemetry.addData("Red: ", colorSensor.red());
         telemetry.addData("Blue: ", colorSensor.blue());
         telemetry.addData("Green: ", colorSensor.green());
+        telemetry.addData("still following?", follower.isBusy());
 
         telemetry.update();
     }

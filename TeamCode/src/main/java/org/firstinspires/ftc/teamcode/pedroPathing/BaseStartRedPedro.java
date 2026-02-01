@@ -47,7 +47,7 @@ public class BaseStartRedPedro extends OpMode
 
     LibraryPedro lib;
     private Follower follower;
-    private Timer pathTimer, actionTimer, opmodeTimer;
+    private Timer pathTimer, actionTimer, opmodeTimer, motifTimer;
     private int pathState; // Current autonomous path state (state machine)
     private final Pose startPose= new Pose(122.69701280227595, 123.92603129445234, Math.toRadians(36));
     public Path shootingPose;
@@ -154,40 +154,60 @@ public class BaseStartRedPedro extends OpMode
             case 1:
                 if(!follower.isBusy())
                 {
-                    follower.followPath(shootAngle,true);
+                    if(motifTimer.getElapsedTimeSeconds()>1 && currMotif.isEmpty())
+                    {
+                        currMotif = lib.getMotif();
+                    }
+                    follower.followPath(shootAngle, true);
+//                    while(motifTimer.getElapsedTimeSeconds() < 0.5)
+//                    {
+//                    }
 //                    lib.orderBalls(currMotif, "ppg");
-                    lib.shootThree(1367);
+
+//                    lib.shootThree(1280);
                     setPathState(2);
                 }
                 break;
             case 2:
-                if(!follower.isBusy() && !lib.isShooting && pathTimer.getElapsedTimeSeconds()>6) {
-                    lib.rampDown();
-                    follower.followPath(collect11, true);
-                    lib.IntakeStart();//ramp moves down, intake starts spinning, carousel spins continously
-                    setPathState(3);
+                if(!follower.isBusy())
+                {
+                    lib.shootThree(1300);
+                    if (!lib.isShooting) {
+                        lib.rampDown();
+                        follower.followPath(collect11, true);//infront of row 1 to intake
+                        lib.IntakeStart();//starts intake
+                        setPathState(3);//moves onto next path
+                    }
                 }
                 break;
             case 3:
-                if(!follower.isBusy() && pathTimer.getElapsedTimeSeconds()>2)
+                if(!follower.isBusy() && pathTimer.getElapsedTimeSeconds()>2 )//checks if it stopped following previous path, checks if its been at leat 0.5 seconds
                 {
-                    follower.followPath(collect12, true);
+                    follower.followPath(collect12, 0.5, true);
                     setPathState(4);
                 }
                 break;
             case 4:
-                if(!follower.isBusy() && !lib.isIntaking && pathTimer.getElapsedTimeSeconds()>1)
+                if(!follower.isBusy() && !lib.isIntaking && pathTimer.getElapsedTimeSeconds()>5)
                 {
                     actionTimer.resetTimer();
-                    if(actionTimer.getElapsedTimeSeconds()>0.5)
-                    {
-                        lib.rampUp();
-                    }
-                    lib.runTogether(//TEST
-                            ()-> lib.orderBalls(currMotif, "gpp"),
-                            ()->follower.followPath(collect1SP, true)
-                    );
-                    lib.shootThree(1367);
+                    lib.rampDown();
+                    lib.rampUp();
+//                    while(actionTimer.getElapsedTimeSeconds()<0.5)
+//                    {
+//                        intake.setPower(-0.7);
+//                    }
+//                    if(actionTimer.getElapsedTimeSeconds()==0.53)
+//                    {
+//                        lib.rampUp();
+//                    }
+//                    intake.setPower(0.0);
+//                    lib.runTogether(//TEST
+//                            ()-> lib.orderBalls(currMotif, "gpp"),
+//                    );
+
+                    follower.followPath(collect1SP, true);
+                    setPathState(5);
                 }
                 break;
             case 5:
@@ -199,7 +219,11 @@ public class BaseStartRedPedro extends OpMode
                     setPathState(6);
                 }
                 break;
-//            case 6:
+            case 6:
+                if(!follower.isBusy()) {//if it stopped moving on the path shoot
+                    lib.shootThree(1300);
+                }
+                break;
 //                if(!follower.isBusy() && pathTimer.getElapsedTimeSeconds()>0.5)
 //                {
 //                    follower.followPath(collect22,true);
@@ -275,6 +299,7 @@ public class BaseStartRedPedro extends OpMode
         opmodeTimer = new Timer();
         actionTimer =  new Timer();
         opmodeTimer.resetTimer();
+        motifTimer = new Timer();
 
         follower = Constants.createFollower((hardwareMap));
         buildPaths();
