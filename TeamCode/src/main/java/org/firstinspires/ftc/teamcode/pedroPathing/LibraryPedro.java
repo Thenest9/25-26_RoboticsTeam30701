@@ -255,7 +255,6 @@ public class LibraryPedro
 //                telemetry.addData("Color:", "Purple, Purple, Green");
             }
 
-
             else if(detectedTagId == 22)
             {
                 motif = "pgp";
@@ -340,18 +339,19 @@ public class LibraryPedro
         telemetry.addData("Order: ", order);
         telemetry.update();
 
-            while(!motif.equals(order))
-            {
+            while(!motif.equals(order)) {
                 //Spins the carousel to the next section
                 orderTimer.resetTimer();
-                while(orderTimer.getElapsedTimeSeconds()<1.25) {
+                while (orderTimer.getElapsedTimeSeconds() < 1.25) {
                     carousel.setPower(0.25);
                 }
-                    //Stops the carousel from spinning
-                    carousel.setPower(0);
-
-                //Move the last item in the string to the front
-                order = order.substring(2) + order.substring(0,2);
+                //Stops the carousel from spinning
+                carousel.setPower(0);
+                if (orderTimer.getElapsedTimeSeconds() > 2.5)
+                {
+                    //Move the last item in the string to the front
+                    order = order.substring(2) + order.substring(0, 2);
+                }
             }
         telemetry.addData("Motif: ", motif);
         telemetry.addData("Order: ", order);

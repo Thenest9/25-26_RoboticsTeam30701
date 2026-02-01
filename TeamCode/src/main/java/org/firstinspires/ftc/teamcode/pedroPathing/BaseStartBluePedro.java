@@ -51,14 +51,14 @@ public class BaseStartBluePedro extends OpMode
 
     LibraryPedro lib;
     private Follower follower;
-    private Timer pathTimer, actionTimer, opmodeTimer;
+    private Timer pathTimer, actionTimer, opmodeTimer , motifTimer;
     private int pathState; // Current autonomous path state (state machine)
     private final Pose startPose= new Pose(20.688, 122.492, Math.toRadians(140));
     public Path shootingPose;
     public PathChain collect11, collect12, collect1SP, collect21, collect22, collect23, collect2SP;
     public PathChain path9,path10;
 
-    public String currMotif;
+    public String currMotif="";
 
 
     public void buildPaths()
@@ -71,7 +71,7 @@ public class BaseStartBluePedro extends OpMode
                                 new Pose(44.795, 98.385),
                                 new Pose(44.695, 98.385)
                         )
-                ).setLinearHeadingInterpolation(Math.toRadians(75), Math.toRadians(145))
+                ).setLinearHeadingInterpolation(Math.toRadians(75), Math.toRadians(150))
                 .build();
 
         collect11 = follower.pathBuilder().addPath(
@@ -79,7 +79,7 @@ public class BaseStartBluePedro extends OpMode
                                 new Pose(44.695, 98.385),
                                 new Pose(44.695, 81.364)
                         )
-                ).setLinearHeadingInterpolation(Math.toRadians(145), Math.toRadians(180))
+                ).setLinearHeadingInterpolation(Math.toRadians(150), Math.toRadians(180))
                 .build();
 
         collect12 = follower.pathBuilder().addPath(
@@ -158,20 +158,28 @@ public class BaseStartBluePedro extends OpMode
         {
             case 0:
                 follower.followPath(shootingPose);
-                currMotif = lib.getMotif();
+                motifTimer.resetTimer();
                 setPathState(1);
                 break;
             case 1:
                 if(!follower.isBusy())
                 {
+                    if(motifTimer.getElapsedTimeSeconds()>1 && currMotif.isEmpty())
+                    {
+                        currMotif = lib.getMotif();
+                    }
                     follower.followPath(path10, true);
-                    lib.orderBalls(currMotif, "ppg");
-                    lib.shootThree(1367);
+//                    while(motifTimer.getElapsedTimeSeconds() < 0.5)
+//                    {
+//                    }
+//                    lib.orderBalls(currMotif, "ppg");
+
+                    lib.shootThree(1280);
                     setPathState(2);
                 }
                 break;
             case 2:
-                if(!follower.isBusy() && !lib.isShooting && pathTimer.getElapsedTimeSeconds()>6)
+                if(!follower.isBusy() && !lib.isShooting && pathTimer.getElapsedTimeSeconds()>4)
                 {
                     lib.rampDown();
                     follower.followPath(collect11, true);//infront of row 1 to intake
@@ -187,28 +195,39 @@ public class BaseStartBluePedro extends OpMode
                 }
                 break;
             case 4:
-                if(!follower.isBusy() && !lib.isIntaking && pathTimer.getElapsedTimeSeconds()>3)
+                if(!follower.isBusy() && !lib.isIntaking && pathTimer.getElapsedTimeSeconds()>5)
                 {
                     actionTimer.resetTimer();
-                    if(actionTimer.getElapsedTimeSeconds()>0.5)
-                    {
-                        lib.rampUp();
-                    }
-                    lib.runTogether(//TEST
-                            ()-> lib.orderBalls(currMotif, "gpp"),
-                            ()->follower.followPath(collect1SP, true)
-                    );
-                    lib.shootThree(1367);
+                    lib.rampDown();
+                    lib.rampUp();
+//                    while(actionTimer.getElapsedTimeSeconds()<0.5)
+//                    {
+//                        intake.setPower(-0.7);
+//                    }
+//                    if(actionTimer.getElapsedTimeSeconds()==0.53)
+//                    {
+//                        lib.rampUp();
+//                    }
+//                    intake.setPower(0.0);
+//                    lib.runTogether(//TEST
+//                            ()-> lib.orderBalls(currMotif, "gpp"),
+//                    );
+
+                        follower.followPath(collect1SP, true);
                     setPathState(5);
                 }
+
                 break;
             case 5://will end auto, set drivers up to intake, ramop will be down when this ends.
-                if(!follower.isBusy()&& !lib.isShooting && pathTimer.getElapsedTimeSeconds()>3)
-                {
-                    lib.rampDown();
-                    follower.followPath(collect21, true);
-                    setPathState(6);
-                }
+            if(!follower.isBusy()) {//if it stopped moving on the path shoot
+                lib.shootThree(1367);
+            }
+//                if(!follower.isBusy()&& !lib.isShooting && pathTimer.getElapsedTimeSeconds()>3)
+//                {
+//                    lib.rampDown();
+//                    follower.followPath(collect21, true);
+//                    setPathState(6);
+//                }
                 break;
 //            case 6:
 //                if(!follower.isBusy() && pathTimer.getElapsedTimeSeconds()>1)
@@ -286,6 +305,7 @@ public class BaseStartBluePedro extends OpMode
         opmodeTimer = new Timer();
         actionTimer =  new Timer();
         opmodeTimer.resetTimer();
+        motifTimer = new Timer();
 
         follower = Constants.createFollower((hardwareMap));
         buildPaths();
@@ -315,6 +335,10 @@ public class BaseStartBluePedro extends OpMode
 
         autonomousPathUpdate();
         drawDebug(follower);
+//        if(currMotif.isEmpty())
+//        {
+//            currMotif=lib.getMotif();
+//        }
 
         telemetry.addData("path state", pathState);
         telemetry.addData("x", follower.getPose().getX());
@@ -325,11 +349,16 @@ public class BaseStartBluePedro extends OpMode
         telemetry.addData("intake timer: ", lib.getIntakeTimer());
         telemetry.addData("Carousel timer: ", lib.getCarTimer());
         telemetry.addData("isIntaking:", lib.isIntaking);
+        telemetry.addData("Action Timer: ", actionTimer.getElapsedTimeSeconds());
+        telemetry.addData("Motif:", lib.getMotif());
         telemetry.addData("Motif", currMotif);
         telemetry.addData("Bottom", touchSensorBot.getState());
         telemetry.addData("Is Ball:", lib.isBall());
         telemetry.addData("Ball count:", lib.getBallCount());
         telemetry.addData("Ball Color:", lib.getBallColor());
+        telemetry.addData("Red: ", colorSensor.red());
+        telemetry.addData("Blue: ", colorSensor.blue());
+        telemetry.addData("Green: ", colorSensor.green());
 
         telemetry.update();
     }

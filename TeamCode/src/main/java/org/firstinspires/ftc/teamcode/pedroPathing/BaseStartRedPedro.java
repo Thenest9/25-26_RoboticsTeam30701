@@ -155,7 +155,7 @@ public class BaseStartRedPedro extends OpMode
                 if(!follower.isBusy())
                 {
                     follower.followPath(shootAngle,true);
-                    lib.orderBalls(currMotif, "ppg");
+//                    lib.orderBalls(currMotif, "ppg");
                     lib.shootThree(1367);
                     setPathState(2);
                 }
