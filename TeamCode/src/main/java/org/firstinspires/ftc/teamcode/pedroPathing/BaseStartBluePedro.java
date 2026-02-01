@@ -85,7 +85,7 @@ public class BaseStartBluePedro extends OpMode
         collect12 = follower.pathBuilder().addPath(
                         new BezierLine(
                                 new Pose(44.695, 81.364),
-                                new Pose(16.000, 81.159)
+                                new Pose(15.500, 81.159)
                         )
                 ).setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(180))
 
@@ -93,11 +93,11 @@ public class BaseStartBluePedro extends OpMode
 
         collect1SP = follower.pathBuilder().addPath(
                         new BezierLine(
-                                new Pose(16.000, 81.159),
+                                new Pose(15.500, 81.159),
 
                                 new Pose(44.695, 98.385)
                         )
-                ).setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(145))
+                ).setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(150))
 
                 .build();
 
