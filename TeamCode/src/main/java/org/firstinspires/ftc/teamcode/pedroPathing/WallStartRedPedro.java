@@ -134,13 +134,13 @@ public class WallStartRedPedro extends OpMode
                 if(!follower.isBusy())
                 {
                     follower.followPath(path10, true);
-                    lib.orderBalls(currMotif, "ppg");
+//                    lib.orderBalls(currMotif, "ppg");
                     lib.shootThree(1367);
                     setPathState(2);
                 }
                 break;
             case 2:
-                if(!follower.isBusy() && !lib.isShooting && pathTimer.getElapsedTimeSeconds()>6)
+                if(!follower.isBusy() && !lib.isShooting && pathTimer.getElapsedTimeSeconds()>4)
                 {
                     lib.rampDown();
                     follower.followPath(BottomRow, true);//infront of row 1 to intake
@@ -149,7 +149,7 @@ public class WallStartRedPedro extends OpMode
                 }
                 break;
             case 3:
-                if(!follower.isBusy() && pathTimer.getElapsedTimeSeconds()>1)//checks if it stopped following previous path, checks if its been at leat 0.5 seconds
+                if(!follower.isBusy() && pathTimer.getElapsedTimeSeconds()>2)//checks if it stopped following previous path, checks if its been at leat 0.5 seconds
                 {
                     follower.followPath(CollectTheBalls, 0.5, true);
                     setPathState(4);
@@ -158,27 +158,28 @@ public class WallStartRedPedro extends OpMode
             case 4:
                 if(!follower.isBusy() && !lib.isIntaking && pathTimer.getElapsedTimeSeconds()>3)
                 {
+                    lib.rampDown();
+                    lib.rampUp();
                     actionTimer.resetTimer();
-                    if(actionTimer.getElapsedTimeSeconds()>0.5)
-                    {
-                        lib.rampUp();
-                    }
-                    lib.runTogether(//TEST
-                            ()-> lib.orderBalls(currMotif, "ppg"),
-                            ()->follower.followPath(ShootingSpot2, true)
-                    );
-                    lib.shootThree(1367);
+//                    lib.runTogether(//TEST
+//                            ()-> lib.orderBalls(currMotif, "ppg"),
+//                            ()->follower.followPath(ShootingSpot2, true)
+//                    );
                     setPathState(5);
                 }
                 break;
             case 5://will end auto, set drivers up to intake, ramop will be down when this ends.
-                if(!follower.isBusy()&& !lib.isShooting && pathTimer.getElapsedTimeSeconds()>3)
-                {
-                    lib.rampDown();
-                    follower.followPath(InfrontofMiddleBalls, true);
-                    setPathState(6);
+//                if(!follower.isBusy()&& !lib.isShooting && pathTimer.getElapsedTimeSeconds()>3)
+//                {
+                if(!follower.isBusy()) {
+                    lib.shootThree(1367);
                 }
                 break;
+//                    lib.rampDown();
+//                    follower.followPath(InfrontofMiddleBalls, true);
+//                    setPathState(6);
+//                }
+//                break;
 //            case 6:
 //                if(!follower.isBusy() && pathTimer.getElapsedTimeSeconds()>1)
 //                {

@@ -75,15 +75,15 @@ public class BaseStartRedPedro extends OpMode
                         new BezierLine(
                                 new Pose(96.000, 95.618),
 
-                                new Pose(100.000, 83.000)
+                                new Pose(98.500, 83.000)
                         )
-                ).setLinearHeadingInterpolation(Math.toRadians(35), Math.toRadians(0))
+                ).setLinearHeadingInterpolation(Math.toRadians(40), Math.toRadians(0))
 
                 .build();
 
         collect12 = follower.pathBuilder().addPath(
                         new BezierLine(
-                                new Pose(100.000, 83.000),
+                                new Pose(98.500, 83.000),
 
                                 new Pose(129.200, 83.000)
                         )
@@ -164,20 +164,17 @@ public class BaseStartRedPedro extends OpMode
 //                    }
 //                    lib.orderBalls(currMotif, "ppg");
 
-//                    lib.shootThree(1280);
+                    lib.shootThree(1280);
                     setPathState(2);
                 }
                 break;
             case 2:
-                if(!follower.isBusy())
+                if(!follower.isBusy() && !lib.isShooting && pathTimer.getElapsedTimeSeconds()>4)
                 {
-                    lib.shootThree(1300);
-                    if (!lib.isShooting) {
-                        lib.rampDown();
-                        follower.followPath(collect11, true);//infront of row 1 to intake
-                        lib.IntakeStart();//starts intake
-                        setPathState(3);//moves onto next path
-                    }
+                    lib.rampDown();
+                    follower.followPath(collect11, true);//infront of row 1 to intake
+                    lib.IntakeStart();//starts intake
+                    setPathState(3);//moves onto next path
                 }
                 break;
             case 3:
@@ -211,19 +208,21 @@ public class BaseStartRedPedro extends OpMode
                 }
                 break;
             case 5:
-                if(!follower.isBusy()&& !lib.isShooting && pathTimer.getElapsedTimeSeconds()>3)
+                if(!follower.isBusy())
                 {
-                    lib.rampDown();
-                    follower.followPath(collect21, true);
+                    lib.shootThree(1280);
+                    if(!lib.isShooting) {
+                        follower.followPath(collect21, true);
 //                    lib.Intake();//starts intake, brings ramp down
-                    setPathState(6);
+                        setPathState(6);
+                    }
                 }
                 break;
-            case 6:
-                if(!follower.isBusy()) {//if it stopped moving on the path shoot
-                    lib.shootThree(1300);
-                }
-                break;
+//            case 6:
+//                if(!follower.isBusy()) {//if it stopped moving on the path shoot
+//                    lib.shootThree(1300);
+//                }
+//                break;
 //                if(!follower.isBusy() && pathTimer.getElapsedTimeSeconds()>0.5)
 //                {
 //                    follower.followPath(collect22,true);
