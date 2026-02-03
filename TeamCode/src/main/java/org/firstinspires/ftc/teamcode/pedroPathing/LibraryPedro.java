@@ -131,7 +131,7 @@ public class LibraryPedro
     }
     public void IntakeStart()
     {
-        intake.setPower(0.7);
+        intake.setPower(0.9);
         ball = 0;
         intakeTimer.resetTimer();
         carTimer.resetTimer();
@@ -164,7 +164,7 @@ public class LibraryPedro
     {
         if(isIntaking)
         {
-            if(intakeTimer.getElapsedTimeSeconds()>6)
+            if(intakeTimer.getElapsedTimeSeconds()>5)
             {
                 intake.setPower(0);
                 carousel.setPower(0.0);
@@ -176,7 +176,7 @@ public class LibraryPedro
         while(touchSensorBot.getState())
         {
             ramp.setPower(-0.5);
-            intake.setPower(-1);
+            intake.setPower(-0.8);
         }
         ramp.setPower(0.0);
         intake.setPower(0.0);
@@ -186,7 +186,7 @@ public class LibraryPedro
         while(touchSensorTop.getState())
         {
             ramp.setPower(0.5);
-            intake.setPower(1);
+            intake.setPower(0.8);
         }
         ramp.setPower(0);
         intake.setPower(0);
@@ -221,7 +221,7 @@ public class LibraryPedro
     }
     public boolean isBall()
     {
-        if(colorSensor.red()>40)
+        if(colorSensor.red()>=40)
         {
           //check if there is a ball. if there is spin for an amount of time to nexct position
             //carouselStart();

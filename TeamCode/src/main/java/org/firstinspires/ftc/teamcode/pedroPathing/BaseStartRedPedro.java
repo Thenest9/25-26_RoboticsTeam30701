@@ -85,7 +85,7 @@ public class BaseStartRedPedro extends OpMode
                         new BezierLine(
                                 new Pose(98.500, 83.000),
 
-                                new Pose(129.200, 83.000)
+                                new Pose(120.200, 83.000)
                         )
                 ).setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0))
 
@@ -93,7 +93,7 @@ public class BaseStartRedPedro extends OpMode
 
         collect1SP = follower.pathBuilder().addPath(
                         new BezierLine(
-                                new Pose(129.200, 83.000),
+                                new Pose(120.200, 83.000),
 
                                 new Pose(96.000, 95.518)
                         )
@@ -185,7 +185,7 @@ public class BaseStartRedPedro extends OpMode
                 }
                 break;
             case 4:
-                if(!follower.isBusy() && !lib.isIntaking && pathTimer.getElapsedTimeSeconds()>5)
+                if(!follower.isBusy() && !lib.isIntaking && pathTimer.getElapsedTimeSeconds()>4)
                 {
                     actionTimer.resetTimer();
                     lib.rampDown();
@@ -211,11 +211,14 @@ public class BaseStartRedPedro extends OpMode
                 if(!follower.isBusy())
                 {
                     lib.shootThree(1280);
-                    if(!lib.isShooting) {
-                        follower.followPath(collect21, true);
-//                    lib.Intake();//starts intake, brings ramp down
-                        setPathState(6);
-                    }
+                    setPathState(6);
+                }
+                break;
+            case 6:
+                if(!lib.isShooting)
+                {
+                    follower.followPath(collect21, true);
+//                    lib.Intake();//starts intake, brings ramp dow
                 }
                 break;
 //            case 6:
@@ -343,6 +346,9 @@ public class BaseStartRedPedro extends OpMode
         telemetry.addData("Is Ball:", lib.isBall());
         telemetry.addData("Ball count:", lib.getBallCount());
         telemetry.addData("Ball Color:", lib.getBallColor());
+        telemetry.addData("Red: ", colorSensor.red());
+        telemetry.addData("Blue: ", colorSensor.blue());
+        telemetry.addData("Green: ", colorSensor.green());
 
         telemetry.update();
     }
