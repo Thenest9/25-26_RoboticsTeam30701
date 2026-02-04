@@ -112,6 +112,7 @@ public class VvhsTeleop extends LinearOpMode {
             IntakeBalls();
             gateMovement();
             rampMovement();
+            telemetry.addData("Motor Speed is : ", motorSpeed);
             telemetry.update();
         }
     }
@@ -124,26 +125,34 @@ public class VvhsTeleop extends LinearOpMode {
         {
             telemetry.addData("dpad_up", "called");
             //If motor speed is less then 1 then increase by .1
-            speedIndex += speedIndex < moveSpeeds.length - 1 ? 1 : 0;
-            if (!(motorSpeed >= 0.9))
+//            speedIndex += speedIndex < moveSpeeds.length - 1 ? 1 : 0;
+            if ((motorSpeed < 1))
             {
-                motorSpeed += 0.3;
+                motorSpeed += 0.2;
                 telemetry.addData("Motor Speed is : ", motorSpeed);
+            }
+            if(motorSpeed > 0.5)
+            {
+                motorSpeed = 1;
             }
         }
         if (gamepad1.dpadDownWasPressed())//M2
         {
             telemetry.addData("dpad_down", "called");
             //If motor speed is greater then -1 then decrease by .1
-            speedIndex += speedIndex > 0 ? -1 : 0;
+//            speedIndex += speedIndex > 0 ? -1 : 0;
+            if(motorSpeed > 0.3)
+            {
+                motorSpeed-=0.2;
+            }
+            if(motorSpeed > 0.5)
+            {
+                motorSpeed = 0.5;
+            }
             telemetry.addData("Motor Speed is : ", motorSpeed);
         }
-        motorSpeed = moveSpeeds[speedIndex];
 
-
-        if (!(motorSpeed <= 0.3)) {
-            motorSpeed -= 0.3;
-        }
+//        motorSpeed = moveSpeeds[speedIndex];
     }
 
 
