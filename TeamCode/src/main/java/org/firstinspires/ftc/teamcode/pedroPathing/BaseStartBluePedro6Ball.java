@@ -1,6 +1,5 @@
 package org.firstinspires.ftc.teamcode.pedroPathing;
 
-import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.telemetry;
 import static org.firstinspires.ftc.teamcode.pedroPathing.Drawing.drawDebug;
 
 import static java.lang.Thread.sleep;
@@ -25,8 +24,8 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.Library;
 
-@Autonomous(name = "Wall Start Red", group = "Autonomous") // Panels
-public class WallStartRedPedro extends OpMode
+@Autonomous(name = "Base Start Blue 6 ball sorted", group = "Autonomous") // Panels
+public class BaseStartBluePedro6Ball extends OpMode
 {
     Limelight3A limelight;
 
@@ -52,69 +51,67 @@ public class WallStartRedPedro extends OpMode
 
     LibraryPedro lib;
     private Follower follower;
-    private Timer pathTimer, actionTimer, opmodeTimer;
+    private Timer pathTimer, actionTimer, opmodeTimer , motifTimer;
     private int pathState; // Current autonomous path state (state machine)
-    public Path ShootingSpot;
-    private final Pose startingPose= new Pose(80.6, 7.6, Math.toRadians(90));
-    public PathChain BottomRow , CollectTheBalls , ShootingSpot2 , InfrontofMiddleBalls;
-    public PathChain path9,path10;
+    private int step;
+    private final Pose startPose= new Pose(20.688, 122.492, Math.toRadians(145));
+    public Path motifPose;
+    public PathChain collect11, collect12, collect1SP;
+    public PathChain path9,shootingPose;
 
-    public String currMotif;
+    public String currMotif="";
 
 
     public void buildPaths()
     {
-        ShootingSpot = new Path (
+        motifPose = new Path(new BezierLine(new Pose(20.688, 122.492), new Pose(44.795,98.385)));
+        motifPose.setLinearHeadingInterpolation(Math.toRadians(145), Math.toRadians(75));
+
+        shootingPose = follower.pathBuilder().addPath(
                         new BezierLine(
-                                new Pose(80.600, 7.600),
-
-                                new Pose(83.558, 83.026)
+                                new Pose(44.795, 98.385),
+                                new Pose(44.695, 98.385)
                         )
-                );
-        ShootingSpot.setLinearHeadingInterpolation(Math.toRadians(90), Math.toRadians(45));
+                ).setLinearHeadingInterpolation(Math.toRadians(75), Math.toRadians(150))
+                .build();
 
-
-        BottomRow = follower.pathBuilder().addPath(
-                    new BezierLine(
-                            new Pose(83.558, 83.026),
-
-                            new Pose(102.000, 37.500)
-                    )
-            ).setLinearHeadingInterpolation(Math.toRadians(45), Math.toRadians(0))
-
-            .build();
-
-        CollectTheBalls = follower.pathBuilder().addPath(
+        collect11 = follower.pathBuilder().addPath(
                         new BezierLine(
-                                new Pose(102.000, 37.500),
-
-                                new Pose(130.000, 37.500)
+                                new Pose(44.695, 98.385),
+                                new Pose(44.695, 81.364)
                         )
-                ).setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0))
+                ).setLinearHeadingInterpolation(Math.toRadians(150), Math.toRadians(180))
+                .build();
+
+        collect12 = follower.pathBuilder().addPath(
+                        new BezierLine(
+                                new Pose(44.695, 81.364),
+                                new Pose(18.00, 81.159)
+                        )
+                ).setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(180))
 
                 .build();
 
-        ShootingSpot2 = follower.pathBuilder().addPath(
-                        new BezierCurve(
-                                new Pose(130.000, 37.500),
-                                new Pose(96.527, 28.441),
-                                new Pose(83.558, 83.026)
+        collect1SP = follower.pathBuilder().addPath(
+                        new BezierLine(
+                                new Pose(18.000, 81.159),
+
+                                new Pose(44.695, 98.385)
                         )
-                ).setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(45))
+                ).setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(145))
 
                 .build();
 
-        InfrontofMiddleBalls = follower.pathBuilder().addPath(
+        path9 = follower.pathBuilder().addPath(
                         new BezierLine(
-                                new Pose(83.558, 83.026),
+                                new Pose(44.795, 98.385),
 
-                                new Pose(102.969, 61.771)
+                                new Pose(20.000, 72.717)
                         )
-                ).setLinearHeadingInterpolation(Math.toRadians(45), Math.toRadians(0))
+                ).setLinearHeadingInterpolation(Math.toRadians(140), Math.toRadians(270))
 
                 .build();
     }
-
 
 
     public void autonomousPathUpdate()
@@ -123,89 +120,92 @@ public class WallStartRedPedro extends OpMode
         // Add your state machine Here
         // Access paths with paths.pathName
         // Refer to the Pedro Pathing Docs (Auto Example) for an example state machine
-        switch (pathState)
+        switch (pathState) 
         {
-            case 0:
-                follower.followPath(ShootingSpot);
-                currMotif = lib.getMotif();
+            case 0://Moves back and looks at Motif
+                follower.followPath(motifPose);
+                motifTimer.resetTimer();
                 setPathState(1);
                 break;
-            case 1:
-                if(!follower.isBusy())
+            case 1://path 10 case, 
+                    switch (step)
+                    {
+                        case 0:
+                            if(motifTimer.getElapsedTimeSeconds()>1 && currMotif.isEmpty())
+                            {
+                                currMotif = lib.getMotif();
+                            }
+                            if(!follower.isBusy()) {
+                                follower.followPath(shootingPose, true);
+                                step = 1;
+                            }
+                            break;
+                        case 1:
+                            if(!follower.isBusy())
+                            {
+                                //Order balls, then case 2, shoot, then case 3, stop and move one
+                                lib.shootThree(1280);
+                                step = 2;
+                            }
+                            break;
+                        case 2:
+                            if(!lib.isShooting)
+                            {
+                                step=0;
+                                setPathState(2);
+                            }
+                            break;
+                    }
+                    break;
+            case 2://move to be infront of balls
+                if(!follower.isBusy() && !lib.isShooting && pathTimer.getElapsedTimeSeconds()>3)
                 {
-                    follower.followPath(path10, true);
-//                    lib.orderBalls(currMotif, "ppg");
-                    lib.shootThree(1367);
-                    setPathState(2);
-                }
-                break;
-            case 2:
-                if(!follower.isBusy() && !lib.isShooting && pathTimer.getElapsedTimeSeconds()>4)
-                {
-                    lib.rampDown();
-                    follower.followPath(BottomRow, true);//infront of row 1 to intake
-                    lib.IntakeStart();//starts intake
-                    setPathState(3);//moves onto next path
+                        lib.rampDown();
+                        follower.followPath(collect11, true);//infront of row 1 to intake
+                        lib.IntakeStart();//starts intake
+                        setPathState(3);//moves onto next path
                 }
                 break;
             case 3:
-                if(!follower.isBusy() && pathTimer.getElapsedTimeSeconds()>2)//checks if it stopped following previous path, checks if its been at leat 0.5 seconds
+                if(!follower.isBusy() && pathTimer.getElapsedTimeSeconds()>2 )//checks if it stopped following previous path, checks if its been at leat 0.5 seconds
                 {
-                    follower.followPath(CollectTheBalls, 0.5, true);
+                    follower.followPath(collect12, 0.8, true);
                     setPathState(4);
                 }
                 break;
             case 4:
-                if(!follower.isBusy() && !lib.isIntaking && pathTimer.getElapsedTimeSeconds()>3)
+                if(!follower.isBusy() && !lib.isIntaking && pathTimer.getElapsedTimeSeconds()>5)
                 {
+                    actionTimer.resetTimer();
                     lib.rampDown();
                     lib.rampUp();
-                    actionTimer.resetTimer();
-//                    lib.runTogether(//TEST
-//                            ()-> lib.orderBalls(currMotif, "ppg"),
-//                            ()->follower.followPath(ShootingSpot2, true)
-//                    );
-                    setPathState(5);
+
+                    lib.orderBalls(currMotif, "gpp");
+                    follower.followPath(collect1SP, true);
+                        setPathState(5);
+                }
+
+                break;
+            case 5:
+            if(!follower.isBusy() && lib.isDoneSpindexing)
+            {
+                lib.shootThree(1300);
+                setPathState(6);
+            }
+            break;
+            case 6:
+                if(!lib.isShooting)
+                {
+                    follower.followPath(path9, true);
+                    setPathState(6);
                 }
                 break;
-            case 5://will end auto, set drivers up to intake, ramop will be down when this ends.
-//                if(!follower.isBusy()&& !lib.isShooting && pathTimer.getElapsedTimeSeconds()>3)
-//                {
-                if(!follower.isBusy()) {
-                    lib.shootThree(1367);
-                }
-                break;
-//                    lib.rampDown();
-//                    follower.followPath(InfrontofMiddleBalls, true);
-//                    setPathState(6);
-//                }
-//                break;
-//            case 6:
-//                if(!follower.isBusy() && pathTimer.getElapsedTimeSeconds()>1)
-//                {
-//                    follower.followPath(collect22,true);
-//                    setPathState(7);
-//                }
-//                break;
-//            case 7:
-//                if(!follower.isBusy())
-//                {
-//                    follower.followPath(collect2SP,true);
-//                    lib.shootThree(1267);
-//                    setPathState(8);
-//                }
-//                break;
-//            case 8:
-//                if (!follower.isBusy() && !lib.isShooting && pathTimer.getElapsedTimeSeconds()>3)
-//                {
-//                    follower.followPath(path9, true);
-//                }
-//                break;
-        }
+            }
     }
     public void setPathState(int pState) {
         pathState = pState;
         pathTimer.resetTimer();
+//        step=0;
     }
 
     @Override
@@ -256,10 +256,11 @@ public class WallStartRedPedro extends OpMode
         opmodeTimer = new Timer();
         actionTimer =  new Timer();
         opmodeTimer.resetTimer();
+        motifTimer = new Timer();
 
         follower = Constants.createFollower((hardwareMap));
         buildPaths();
-        follower.setStartingPose(startingPose);
+        follower.setStartingPose(startPose);
 
         lib = new LibraryPedro(outputRight, outputLeft, carousel, telemetry, limelight, intake, ramp, gate, colorSensor, touchSensorTop, touchSensorBot);
 
@@ -285,6 +286,10 @@ public class WallStartRedPedro extends OpMode
 
         autonomousPathUpdate();
         drawDebug(follower);
+//        if(currMotif.isEmpty())
+//        {
+//            currMotif=lib.getMotif();
+//        }
 
         telemetry.addData("path state", pathState);
         telemetry.addData("x", follower.getPose().getX());
@@ -295,11 +300,17 @@ public class WallStartRedPedro extends OpMode
         telemetry.addData("intake timer: ", lib.getIntakeTimer());
         telemetry.addData("Carousel timer: ", lib.getCarTimer());
         telemetry.addData("isIntaking:", lib.isIntaking);
+        telemetry.addData("Action Timer: ", actionTimer.getElapsedTimeSeconds());
+        telemetry.addData("Motif:", lib.getMotif());
         telemetry.addData("Motif", currMotif);
         telemetry.addData("Bottom", touchSensorBot.getState());
         telemetry.addData("Is Ball:", lib.isBall());
         telemetry.addData("Ball count:", lib.getBallCount());
         telemetry.addData("Ball Color:", lib.getBallColor());
+        telemetry.addData("Red: ", colorSensor.red());
+        telemetry.addData("Blue: ", colorSensor.blue());
+        telemetry.addData("Green: ", colorSensor.green());
+        telemetry.addData("still following?", follower.isBusy());
 
         telemetry.update();
     }

@@ -2,18 +2,16 @@ package org.firstinspires.ftc.teamcode.pedroPathing;
 
 import static org.firstinspires.ftc.teamcode.pedroPathing.Drawing.drawDebug;
 
-import static java.lang.Thread.sleep;
-
+import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierCurve;
+import com.pedropathing.geometry.BezierLine;
+import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.Path;
+import com.pedropathing.paths.PathChain;
 import com.pedropathing.util.Timer;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
-import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.pedropathing.geometry.BezierLine;
-import com.pedropathing.follower.Follower;
-import com.pedropathing.paths.PathChain;
-import com.pedropathing.geometry.Pose;
+import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -22,10 +20,8 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.Servo;
 
-import org.firstinspires.ftc.teamcode.Library;
-
-@Autonomous(name = "Base Start Blue", group = "Autonomous") // Panels
-public class BaseStartBluePedro extends OpMode
+@Autonomous(name = "Base Start Red 9 Ball", group = "Autonomous")
+public class BaseStartRed9Ball extends OpMode
 {
     Limelight3A limelight;
 
@@ -51,130 +47,115 @@ public class BaseStartBluePedro extends OpMode
 
     LibraryPedro lib;
     private Follower follower;
-    private Timer pathTimer, actionTimer, opmodeTimer , motifTimer;
+    private Timer pathTimer, actionTimer, opmodeTimer, motifTimer;
     private int pathState; // Current autonomous path state (state machine)
-    private final Pose startPose= new Pose(20.688, 122.492, Math.toRadians(145));
-    public Path shootingPose;
+    private final Pose startPose= new Pose(125.56472261735418, 120.23897581792318, Math.toRadians(36));
+    public Path MotifPose;
     public PathChain collect11, collect12, collect1SP, collect21, collect22, collect23, collect2SP;
-    public PathChain path9,path10;
+    public PathChain endGate, shootAngle;
 
-    public String currMotif="";
+    public String currMotif;
 
+    public void buildPaths() {
+        MotifPose = new Path(new BezierLine(new Pose(122.697, 123.926), new Pose(96.000, 95.518)));
+        MotifPose.setLinearHeadingInterpolation(Math.toRadians(36), Math.toRadians(90));
 
-    public void buildPaths()
-    {
-        shootingPose = new Path(new BezierLine(new Pose(20.688, 122.492), new Pose(44.795,98.385)));
-        shootingPose.setLinearHeadingInterpolation(Math.toRadians(145), Math.toRadians(75));
-
-        path10 = follower.pathBuilder().addPath(
+        shootAngle = follower.pathBuilder().addPath(
                         new BezierLine(
-                                new Pose(44.795, 98.385),
-                                new Pose(44.695, 98.385)
+                                new Pose(96.000, 95.518),
+
+                                new Pose(96.000, 95.618)
                         )
-                ).setLinearHeadingInterpolation(Math.toRadians(75), Math.toRadians(150))
+                ).setLinearHeadingInterpolation(Math.toRadians(90), Math.toRadians(40))
+
                 .build();
 
         collect11 = follower.pathBuilder().addPath(
                         new BezierLine(
-                                new Pose(44.695, 98.385),
-                                new Pose(44.695, 81.364)
+                                new Pose(96.000, 95.618),
+
+                                new Pose(100.000, 83.000)
                         )
-                ).setLinearHeadingInterpolation(Math.toRadians(150), Math.toRadians(180))
+                ).setLinearHeadingInterpolation(Math.toRadians(35), Math.toRadians(0))
+
                 .build();
 
         collect12 = follower.pathBuilder().addPath(
                         new BezierLine(
-                                new Pose(44.695, 81.364),
-                                new Pose(18.00, 81.159)
+                                new Pose(100.000, 83.000),
+
+                                new Pose(129.200, 83.000)
                         )
-                ).setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(180))
+                ).setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0))
 
                 .build();
 
         collect1SP = follower.pathBuilder().addPath(
                         new BezierLine(
-                                new Pose(18.000, 81.159),
+                                new Pose(129.200, 83.000),
 
-                                new Pose(44.695, 98.385)
+                                new Pose(96.000, 95.518)
                         )
-                ).setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(145))
+                ).setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(40))
 
                 .build();
 
         collect21 = follower.pathBuilder().addPath(
                         new BezierLine(
-                                new Pose(44.795, 98.385),
+                                new Pose(96.000, 95.518),
 
-                                new Pose(44.795, 57.354)
+                                new Pose(100.000, 58.400)
                         )
-                ).setLinearHeadingInterpolation(Math.toRadians(145), Math.toRadians(180))
+                ).setLinearHeadingInterpolation(Math.toRadians(40), Math.toRadians(0))
 
                 .build();
 
-        collect22 = follower.pathBuilder().addPath(new BezierLine(new Pose(44.795, 57.354), new Pose(8.000, 57.354))
-                ).setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(180))
+        collect22 = follower.pathBuilder().addPath(
+                        new BezierLine(
+                                new Pose(100.000, 58.400),
+
+                                new Pose(135.000, 58.400)
+                        )
+                ).setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0))
 
                 .build();
-
-//        collect23 = follower.pathBuilder().addPath(
-//                        new BezierLine(
-//                                new Pose(8.000, 57.354),
-//
-//                                new Pose(25.79516358463727, 57.354)
-//                        )
-//                ).setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(90))
-//
-//                .build();
 
         collect2SP = follower.pathBuilder().addPath(
                         new BezierCurve(
-                                new Pose(8.000, 57.354),
-                                new Pose(47.447, 57.868),
-                                new Pose(44.795, 98.385)
+                                new Pose(135.000, 58.400),
+                                new Pose(103.647, 54.896),
+                                new Pose(96.000, 95.518)
                         )
-                ).setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(140))
+                ).setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(40))
 
                 .build();
 
-        path9 = follower.pathBuilder().addPath(
+        endGate = follower.pathBuilder().addPath(
                         new BezierLine(
-                                new Pose(44.795, 98.385),
+                                new Pose(96.000, 95.518),
 
-                                new Pose(20.000, 72.717)
+                                new Pose(125.000, 70.000)
                         )
-                ).setLinearHeadingInterpolation(Math.toRadians(140), Math.toRadians(270))
+                ).setLinearHeadingInterpolation(Math.toRadians(40), Math.toRadians(270))
 
                 .build();
     }
 
-
     public void autonomousPathUpdate()
     {
-
-        // Add your state machine Here
-        // Access paths with paths.pathName
-        // Refer to the Pedro Pathing Docs (Auto Example) for an example state machine
         switch (pathState)
         {
-            case 0:
-                follower.followPath(shootingPose);
-                motifTimer.resetTimer();
+            case 0://will turn and get motif
+                follower.followPath(MotifPose);
+                currMotif = lib.getMotif();
                 setPathState(1);
                 break;
             case 1:
                 if(!follower.isBusy())
                 {
-                    if(motifTimer.getElapsedTimeSeconds()>1 && currMotif.isEmpty())
-                    {
+                    if(motifTimer.getElapsedTimeSeconds()>1 && currMotif.isEmpty()) {
                         currMotif = lib.getMotif();
                     }
-                    follower.followPath(path10, true);
-//                    while(motifTimer.getElapsedTimeSeconds() < 0.5)
-//                    {
-
-//                    }
-//                    lib.orderBalls(currMotif, "ppg");
-
                     lib.shootThree(1280);
                     setPathState(2);
                 }
@@ -182,87 +163,69 @@ public class BaseStartBluePedro extends OpMode
             case 2:
                 if(!follower.isBusy() && !lib.isShooting && pathTimer.getElapsedTimeSeconds()>4)
                 {
-                        lib.rampDown();
-                        follower.followPath(collect11, true);//infront of row 1 to intake
-                        lib.IntakeStart();//starts intake
-                        setPathState(3);//moves onto next path
+                    lib.rampDown();
+                    follower.followPath(collect11, true);//infront of row 1 to intake
+                    lib.IntakeStart();//starts intake
+                    setPathState(3);//moves onto next path
                 }
                 break;
             case 3:
-                if(!follower.isBusy() && pathTimer.getElapsedTimeSeconds()>2 )//checks if it stopped following previous path, checks if its been at leat 0.5 seconds
+                if(!follower.isBusy() && pathTimer.getElapsedTimeSeconds()>2 )//checks if it stopped following previous path, checks if its been at leat 2 seconds
                 {
-                    follower.followPath(collect12, 0.5, true);
+                    follower.followPath(collect12, 0.8, true);
                     setPathState(4);
                 }
                 break;
             case 4:
-                if(!follower.isBusy() && !lib.isIntaking && pathTimer.getElapsedTimeSeconds()>5)
+                if(!follower.isBusy() && !lib.isIntaking && pathTimer.getElapsedTimeSeconds()>3)
                 {
                     actionTimer.resetTimer();
                     lib.rampDown();
-//                    lib.rampUp();
-//                    while(actionTimer.getElapsedTimeSeconds()<0.5)
-//                    {
-//                        intake.setPower(-0.7);
-//                    }
-//                    if(actionTimer.getElapsedTimeSeconds()==0.53)
-//                    {
-//                        lib.rampUp();
-//                    }
-//                    intake.setPower(0.0);
-//                    lib.runTogether(//TEST
-//                            ()-> lib.orderBalls(currMotif, "gpp"),
-//                    );
-
-                        follower.followPath(collect1SP, true);
+                    lib.rampUp();
+                    follower.followPath(collect1SP, true);
                     setPathState(5);
                 }
-
                 break;
-            case 5://will end auto, set drivers up to intake, ramop will be down when this ends.
-            if(!follower.isBusy()) {//if it stopped moving on the path shoot
-                lib.rampUp();
-                lib.shootThree(1300);
-                setPathState(6);
-            }
-            break;
-            case 6:
-                if(!lib.isShooting)
+            case 5:
+                if(!follower.isBusy())
                 {
-                    follower.followPath(path9, true);
+                    lib.shootThree(1280);
                     setPathState(6);
                 }
                 break;
-            }
-//                if(!follower.isBusy()&& !lib.isShooting && pathTimer.getElapsedTimeSeconds()>3)
-//                {
-//                    lib.rampDown();
-//                    follower.followPath(collect21, true);
-//                    setPathState(6);
+            case 6:
+                if(!lib.isShooting)
+                {
+                    follower.followPath(collect21, true);
+//                    lib.Intake();//starts intake, brings ramp dow
+                }
+                break;
+//            case 6:
+//                if(!follower.isBusy()) {//if it stopped moving on the path shoot
+//                    lib.shootThree(1300);
 //                }
 //                break;
-//            case 6:
-//                if(!follower.isBusy() && pathTimer.getElapsedTimeSeconds()>1)
+//                if(!follower.isBusy() && pathTimer.getElapsedTimeSeconds()>0.5)
 //                {
 //                    follower.followPath(collect22,true);
 //                    setPathState(7);
 //                }
 //                break;
-//            case 7:
-//                if(!follower.isBusy())
+////            case 7:
+//                if(!follower.isBusy() && !lib.isIntaking && pathTimer.getElapsedTimeSeconds()>1)
 //                {
 //                    follower.followPath(collect2SP,true);
 //                    lib.shootThree(1267);
-//                    setPathState(8);
-//                }
-//                break;
-//            case 8:
+//                    setPathState(9);
+//                    }
+//                    break;
+//            case 9:
 //                if (!follower.isBusy() && !lib.isShooting && pathTimer.getElapsedTimeSeconds()>3)
 //                {
 //                    follower.followPath(path9, true);
 //                }
 //                break;
-//        }
+            }
     }
     public void setPathState(int pState) {
         pathState = pState;
@@ -347,10 +310,6 @@ public class BaseStartBluePedro extends OpMode
 
         autonomousPathUpdate();
         drawDebug(follower);
-//        if(currMotif.isEmpty())
-//        {
-//            currMotif=lib.getMotif();
-//        }
 
         telemetry.addData("path state", pathState);
         telemetry.addData("x", follower.getPose().getX());
@@ -361,9 +320,7 @@ public class BaseStartBluePedro extends OpMode
         telemetry.addData("intake timer: ", lib.getIntakeTimer());
         telemetry.addData("Carousel timer: ", lib.getCarTimer());
         telemetry.addData("isIntaking:", lib.isIntaking);
-        telemetry.addData("Action Timer: ", actionTimer.getElapsedTimeSeconds());
-        telemetry.addData("Motif:", lib.getMotif());
-        telemetry.addData("Motif", currMotif);
+        telemetry.addData("Motif", "hi");
         telemetry.addData("Bottom", touchSensorBot.getState());
         telemetry.addData("Is Ball:", lib.isBall());
         telemetry.addData("Ball count:", lib.getBallCount());
@@ -371,14 +328,14 @@ public class BaseStartBluePedro extends OpMode
         telemetry.addData("Red: ", colorSensor.red());
         telemetry.addData("Blue: ", colorSensor.blue());
         telemetry.addData("Green: ", colorSensor.green());
-        telemetry.addData("still following?", follower.isBusy());
 
         telemetry.update();
     }
-
     public void start()
     {
         opmodeTimer.resetTimer();
         setPathState(0);
     }
+
+
 }

@@ -62,6 +62,7 @@ public class LibraryPedro
     public boolean isShooting;
     public boolean isIntaking=false;
     public boolean isCarMoving;
+    public boolean isDoneSpindexing;
 
     private Timer intakeTimer;
     private Timer shootTimer;
@@ -140,7 +141,7 @@ public class LibraryPedro
     public void carouselStart()
     {
         carTimer.resetTimer();
-        if(isBall() && carTimer.getElapsedTimeSeconds()<1.25)//
+        if(isBall() && carTimer.getElapsedTimeSeconds()<1.25)//while mag switch is true then move, ball++
         {
             carousel.setPower(0.3);
             isCarMoving = true;
@@ -150,21 +151,12 @@ public class LibraryPedro
             carTimer.resetTimer();
             carousel.setPower(0);
         }
-
-    }
-    public void endCarousel()
-    {
-        if(carTimer.getElapsedTimeSeconds() > 1.250)
-        {
-            carousel.setPower(0);
-            isCarMoving=false;
-        }
     }
     public void finishIntake()//called in the loop function, continously checks
     {
         if(isIntaking)
         {
-            if(intakeTimer.getElapsedTimeSeconds()>5)
+            if(intakeTimer.getElapsedTimeSeconds()>5)//if ball count is 2 stop intaking
             {
                 intake.setPower(0);
                 carousel.setPower(0.0);
@@ -332,6 +324,7 @@ public class LibraryPedro
     }
     public void orderBalls(String motif, String order)
     {
+//        isDoneIntaking=true;
         //Moves the gate to the front area of the carousel, the values are absolute
         gate.setPosition(0.67);
 
@@ -339,7 +332,9 @@ public class LibraryPedro
         telemetry.addData("Order: ", order);
         telemetry.update();
 
-            while(!motif.equals(order)) {
+        while(!motif.equals(order))
+        {
+            isDoneSpindexing=false;
                 //Spins the carousel to the next section
                 orderTimer.resetTimer();
                 while (orderTimer.getElapsedTimeSeconds() < 1.25) {
@@ -352,12 +347,13 @@ public class LibraryPedro
                     //Move the last item in the string to the front
                     order = order.substring(2) + order.substring(0, 2);
                 }
-            }
+        }
         telemetry.addData("Motif: ", motif);
         telemetry.addData("Order: ", order);
         telemetry.update();
 
         gate.setPosition(0.95);
+        isDoneSpindexing=true;
     }
 //
 //    private boolean orderPossible(String order)
