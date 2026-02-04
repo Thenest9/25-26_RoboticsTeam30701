@@ -37,10 +37,10 @@ public class LibraryTester extends LinearOpMode
 
     CRServo carousel;
     Servo gate;
-    final double shooterP = 40.132;
-    final double shooterI = 0;
-    final double shooterD = 0;
-    final double shooterF = 13.727;
+    double shooterP = 48.72995;
+    double shooterI = 0;
+    double shooterD = 0;
+    double shooterF = 13.13319;
 
     double velocity = 1400;
     double distance = 0;
@@ -87,7 +87,7 @@ public class LibraryTester extends LinearOpMode
 
         while(opModeIsActive())
         {
-            changeVelo();
+            changeVelo(lib);
             moveRobot(lib);
             turnRobot(lib);
 
@@ -127,10 +127,6 @@ public class LibraryTester extends LinearOpMode
             {
                 ramp.setPower(0);
             }
-
-
-            limelight.pipelineSwitch(6);
-            distance = lib.getAprilTagDistance(limelight.getLatestResult().getTy());
 
             telemetry.addData("Velocity: ", velocity);
             telemetry.addData("Distance (in): ", distance);
@@ -231,15 +227,18 @@ public class LibraryTester extends LinearOpMode
         }
     }
 
-    public void changeVelo()
+    public void changeVelo(Library lib)
     {
-        if(gamepad1.dpadUpWasPressed())
+        limelight.pipelineSwitch(6);
+        distance = lib.getAprilTagDistance(limelight.getLatestResult().getTy());
+
+        if(limelight.getLatestResult().getTy() != 0)
         {
-            velocity += 5;
+             velocity = 1077.678571 + (4.755952 * distance);
         }
-        if(gamepad1.dpadDownWasPressed())
+        else
         {
-            velocity -= 5;
+            velocity = 1400;
         }
     }
 }
