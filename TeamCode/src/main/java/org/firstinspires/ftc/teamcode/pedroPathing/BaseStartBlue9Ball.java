@@ -217,7 +217,7 @@ public class BaseStartBlue9Ball extends OpMode
 
     */
 
-    //
+    //Code that is ran at the start when the play button is ran
     public void start()
     {
         gateClose();
