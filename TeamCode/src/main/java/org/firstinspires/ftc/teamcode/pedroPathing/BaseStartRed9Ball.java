@@ -194,7 +194,7 @@ public class BaseStartRed9Ball extends OpMode
 
         //Creating the follower object so the robot knows to follow certain paths
         follower = Constants.createFollower((hardwareMap));
-        follower.setStartingPose(startPose);
+        follower.setStartingPose(start);
     }
     //------------------------FINISH DECLARING HARDWARE------------------------//
 
