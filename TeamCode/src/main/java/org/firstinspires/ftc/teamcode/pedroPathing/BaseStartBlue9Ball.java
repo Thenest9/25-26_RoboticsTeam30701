@@ -117,7 +117,7 @@ public class BaseStartBlue9Ball extends OpMode
 
 
     //All the way points the robot is going to go, each name tells its own one
-    Pose start = new Pose(121, 126, Math.toRadians(37));
+    Pose start = new Pose(20, 122, Math.toRadians(144));
 
     Pose motifPos = new Pose(53, 90, Math.toRadians(85));
 
