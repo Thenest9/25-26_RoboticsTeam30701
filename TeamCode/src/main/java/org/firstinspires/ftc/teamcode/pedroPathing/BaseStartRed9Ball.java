@@ -71,14 +71,6 @@ public class BaseStartRed9Ball extends OpMode
     //The position for where the robot starts on the field
     private final Pose startPose = new Pose(20.688, 122.492, Math.toRadians(140));
 
-    //The position for where the robot shoots on the field
-    public Path shootingPose = new Path(new BezierLine(new Pose(20.688, 122.492), new Pose(44.795,98.385)));
-
-    //No idea what it does
-    public PathChain collect11, collect12, collect1SP, collect21, collect22, collect2SP, path9, path10;
-    //End here
-
-
     //The value of the motif
     public String motif;
 
@@ -219,7 +211,7 @@ public class BaseStartRed9Ball extends OpMode
 
     */
 
-    //
+    //Code that is ran
     public void start()
     {
         gateClose();
