@@ -1,18 +1,31 @@
 package org.firstinspires.ftc.teamcode;
 
 //Import to be able to use opMode, so you can sleep the robot and check if it is active
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
+//Import to be able to use the carousel, so you can get the balls to the flywheels
+import com.qualcomm.robotcore.hardware.CRServo;
+
+//Import to be able to use the wheels motors, so you can move the robot
+import com.qualcomm.robotcore.hardware.DcMotor;
+
+//Import to be able to move the fly wheels, so you can shoot the balls
+import com.qualcomm.robotcore.hardware.DcMotorEx;
+
+//Import to be able to use telemetry
+import org.firstinspires.ftc.robotcore.external.Telemetry;
+
+//Imports to use the Limelight; Used in getMotif() and positionToGoal
+import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.LLResultTypes;
-import com.qualcomm.hardware.limelightvision.Limelight3A;
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.hardware.CRServo;
-import com.qualcomm.robotcore.hardware.ColorSensor;
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.hardware.limelightvision.LLStatus;
+
+//Import to use the gate servo, used for indexing
 import com.qualcomm.robotcore.hardware.Servo;
 
-import org.firstinspires.ftc.robotcore.external.Telemetry;
+//Import to use the color sensor, used for indexing and checking color for the ball
+import com.qualcomm.robotcore.hardware.ColorSensor;
 
 public class Library
 {
@@ -625,36 +638,33 @@ public class Library
         setMotorsPower(power, power, power, power);
     }
 
+    //Stops the robot
+    public void stopMoving()
+    {
+        setMotorsPower(0, 0, 0, 0);
+    }
+
     /*Shoots the ball out of the carousel
     Takes in an int parameter telling the robot to spin the fly wheels at what speed
     Takes in an long parameter telling the robot how long to charge for before shooting
     */
-    public void shoot(int velocity, long flyWheelSleepTime, long carouselSleepTime)
+    public void shoot(double velocity)
     {
-        long startTime = System.currentTimeMillis();
+        outputRight.setVelocity(velocity);
+        outputLeft.setVelocity(velocity);
 
-        while (opMode.opModeIsActive() && System.currentTimeMillis() - startTime < flyWheelSleepTime)
-        {
-            outputRight.setVelocity(velocity);
-            outputLeft.setVelocity(velocity);
-        }
+        carousel.setPower(-0.25);
+        opMode.sleep(1000);
 
-        carousel.setPower(-0.67);
-        opMode.sleep(carouselSleepTime);
         carousel.setPower(0.0);
-        startTime = System.currentTimeMillis();
-
-        while (opMode.opModeIsActive() && System.currentTimeMillis() - startTime < (flyWheelSleepTime / 2))
-        {
-            outputRight.setVelocity(0);
-            outputLeft.setVelocity(0);
-        }
+        outputRight.setVelocity(0);
+        outputLeft.setVelocity(0);
 
         telemetry.addData("Shooter", "Stopped");
         telemetry.update();
     }
 
-    public void shootThree(int velocity)
+    public void shootThree(double velocity)
     {
         outputRight.setVelocity(velocity);
         outputLeft.setVelocity(velocity);
@@ -716,13 +726,15 @@ public class Library
         telemetry.addData("Order: ", order);
         telemetry.update();
 
-        if(orderPossible(order))
+        if(orderPossible(order) && opMode.opModeIsActive())
         {
+            carousel.setPower(0);
+            opMode.sleep(500);
             while(!motif.equals(order))
             {
                 //Spins the carousel to the next section
                 carousel.setPower(0.25);
-                opMode.sleep(1250);
+                opMode.sleep(1000);
 
                 //Stops the carousel from spinning
                 carousel.setPower(0);
@@ -751,37 +763,38 @@ public class Library
     }
 
     //Spins through the carousel and gets the values of the order of the balls
-//    public String getOrder()
-//    {
-//        String order = "";
-//        for(int i = 0; i < 3; i++)
-//        {
-//            //Spins the carousel to the next section
-//            carousel.setPower(0.25);
-//            opMode.sleep(1000);
-//
-//            //Spins the carousel up a little bit
-//            carousel.setPower(-0.2);
-//            opMode.sleep(220);
-//
-//            //Stops the carousel from spinning
-//            carousel.setPower(0);
-//            opMode.sleep(280);
-//
-//            //Adds the current ball to the string already made
-//            order = checkRGB() + order;
-//
-//            //Telemetry for us knowing the details of each ball
-//            telemetry.addData("CS Red: ", colorSensor.red());
-//            telemetry.addData("CS Green: ", colorSensor.green());
-//            telemetry.addData("CS Blue: ", colorSensor.blue());
-//            telemetry.addData("Current Order: ", order);
-//            telemetry.update();
-//        }
-//
-//        //Returns the string filled with the correct order
-//        return order;
-//    }
+    public String getOrder()
+    {
+        String order = "";
+
+        for(int i = 0; i < 3; i++)
+        {
+            //Spins the carousel to the next section
+            carousel.setPower(0.25);
+            opMode.sleep(1000);
+
+            //Spins the carousel up a little bit
+            carousel.setPower(-0.2);
+            opMode.sleep(220);
+
+            //Stops the carousel from spinning
+            carousel.setPower(0);
+            opMode.sleep(280);
+
+            //Adds the current ball to the string already made
+            order = checkRGB() + order;
+
+            //Telemetry for us knowing the details of each ball
+            telemetry.addData("CS Red: ", colorSensor.red());
+            telemetry.addData("CS Green: ", colorSensor.green());
+            telemetry.addData("CS Blue: ", colorSensor.blue());
+            telemetry.addData("Current Order: ", order);
+            telemetry.update();
+        }
+
+        //Returns the string filled with the correct order
+        return order;
+    }
 
     //Checks what type of ball is there and returns a string depending on what is there
     //g for a green ball
@@ -820,7 +833,7 @@ public class Library
         return "n";
     }
 
-    public void turnAprilTag(int pipeline)
+    public void turnToAprilTag(int pipeline)
     {
         limelight.pipelineSwitch(pipeline);
         opMode.sleep(100);
@@ -837,7 +850,6 @@ public class Library
                 double turnPower = tx * 0.02; // Scale factor for turning
 
                 // Clamp the power to avoid being too slow or too fast
-                double maxPower = 0.4;
                 double minPowerTurn = 0.2;
                 double maxPowerTurn = 0.35;
                 double degreeFromCenter = 2;
@@ -863,7 +875,7 @@ public class Library
                 setMotorsPower(-turnPower, -turnPower, -turnPower, -turnPower);
 
                 // Check if we’re close enough to the target
-                if (Math.abs(tx) < degreeFromCenter)
+                if (tx < 10 && tx > -1.5)
                 {
                     aligned = true;
 
@@ -884,4 +896,52 @@ public class Library
 
         setMotorsPower(0, 0, 0, 0);
     }
+
+    //Runs two tasks that are passed through as parameters
+    public void runTogether(Runnable run1, Runnable run2)
+    {
+        //2 thread objects that run the 2 tasks
+        Thread turnGoal = new Thread(run1);
+        Thread orderBalls = new Thread(run2);
+
+        //Starts both of the threads
+        turnGoal.start();
+        orderBalls.start();
+
+        //Joins the 2 threads back to the main thread
+        try
+        {
+            turnGoal.join();
+            orderBalls.join();
+        }
+        //If they have an error, it passes a error in the log
+        catch (InterruptedException e)
+        {
+            telemetry.addData("Joining Threads: ", "Failed");
+            telemetry.update();
+        }
+    }
+
+    //Method is in inches
+    public double getAprilTagDistance(double ty)
+    {
+        double cameraHeight = 15.5; //Height of camera from floor to center
+        double tagHeight = 29.5; //Height of tag from floor to center
+        double cameraAmountAngle = 6.504; //The angle the limelight is mounted at
+
+        //The angle at which the camera is looking up towards the apriltag
+        double angleRad = Math.toRadians(cameraAmountAngle + ty);
+
+        //tagHeight - cameraHeight is the length of the side from the camera height to
+        // the april tag height.
+        double height = (tagHeight - cameraHeight);
+
+        //Math.tan(angleRad) returns the steepness of the hypotenuse.
+        double steepness = Math.tan(angleRad);
+
+        //We divide the height from the camera to the april tag, and divide it by the steepness
+        //which cancels out the height to give you the distance.
+        return height / steepness;
+    }
+
 }
