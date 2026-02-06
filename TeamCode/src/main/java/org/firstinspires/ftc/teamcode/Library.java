@@ -726,7 +726,7 @@ public class Library
         telemetry.addData("Order: ", order);
         telemetry.update();
 
-        if(orderPossible(order) && opMode.opModeIsActive())
+        if(orderPossible(order))
         {
             carousel.setPower(0);
             opMode.sleep(500);

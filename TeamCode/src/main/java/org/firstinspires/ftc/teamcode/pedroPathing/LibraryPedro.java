@@ -60,10 +60,20 @@ public class LibraryPedro
     DigitalChannel touchSensorBot;
     DigitalChannel touchSensorTop;
     public boolean isShooting;
-    public boolean isIntaking;
+    public boolean isIntaking=false;
+    public boolean isCarMoving;
+    public boolean isDoneSpindexing;
+
     private Timer intakeTimer;
     private Timer shootTimer;
-    private Timer rampTimer;
+    private Timer carTimer;
+    private Timer orderTimer;
+    private int ball;
+    double shooterP = 48.72995;
+    double shooterI = 0;
+    double shooterD = 0;
+    double shooterF = 13.13319;
+
 
     public LibraryPedro(DcMotorEx oR, DcMotorEx oL, CRServo c, Telemetry t, Limelight3A ll, DcMotor i, DcMotor r, Servo g, ColorSensor cs, DigitalChannel top, DigitalChannel bot)
     {
@@ -81,7 +91,8 @@ public class LibraryPedro
 
         shootTimer = new Timer();
         intakeTimer = new Timer();
-        rampTimer = new Timer();
+        carTimer = new Timer();
+        orderTimer = new Timer();
     }
 
     //Being able to make the Library object without having all the constructors at the cost of
@@ -90,6 +101,7 @@ public class LibraryPedro
     {
 
     }
+
     public double getShootTimer()
     {
         return shootTimer.getElapsedTimeSeconds();
@@ -98,10 +110,12 @@ public class LibraryPedro
     {
         return intakeTimer.getElapsedTimeSeconds();
     }
-    public double getRampTimer()
+    public double getCarTimer()
     {
-        return rampTimer.getElapsedTimeSeconds();
+        return carTimer.getElapsedTimeSeconds();
     }
+
+    public int getBallCount(){return ball;}
     public void initTimer()
     {
         if(shootTimer==null)
@@ -111,29 +125,38 @@ public class LibraryPedro
         if(intakeTimer==null) {
             intakeTimer = new Timer();
         }
-        if(rampTimer==null)
+        if(carTimer==null)
         {
-            rampTimer= new Timer();
+            carTimer= new Timer();
         }
     }
-//    public void intakeProcess1()
-//    {
-//        rampDown();
-//        IntakeStart();
-//    }
     public void IntakeStart()
     {
-        intake.setPower(1);
-        carousel.setPower(1);
-
-        intakeTimer.resetTimer();//TODO: create individual timers for shoot and intake
+        intake.setPower(0.9);
+        ball = 0;
+        intakeTimer.resetTimer();
+        carTimer.resetTimer();
         isIntaking = true;
     }
-    public void finishIntake()
+    public void carouselStart()
+    {
+        carTimer.resetTimer();
+        if(isBall() && carTimer.getElapsedTimeSeconds()<1.25)//while mag switch is true then move, ball++
+        {
+            carousel.setPower(0.3);
+            isCarMoving = true;
+        }
+        else
+        {
+            carTimer.resetTimer();
+            carousel.setPower(0);
+        }
+    }
+    public void finishIntake()//called in the loop function, continously checks
     {
         if(isIntaking)
         {
-            if(intakeTimer.getElapsedTimeSeconds()>5.0)
+            if(intakeTimer.getElapsedTimeSeconds()>5)//if ball count is 2 stop intaking
             {
                 intake.setPower(0);
                 carousel.setPower(0.0);
@@ -145,29 +168,30 @@ public class LibraryPedro
         while(touchSensorBot.getState())
         {
             ramp.setPower(-0.5);
-            intake.setPower(-1);
+            intake.setPower(-0.8);
         }
         ramp.setPower(0.0);
         intake.setPower(0.0);
 
     }
-    public void rampUp()
-    {
+    public void rampUp() {
         while(touchSensorTop.getState())
         {
-            ramp.setPower(-0.5);
-            intake.setPower(1);
+            ramp.setPower(0.5);
+            intake.setPower(0.8);
         }
-            ramp.setPower(0);
-            intake.setPower(0);
+        ramp.setPower(0);
+        intake.setPower(0);
     }
+
     public void shootThree(int velocity)
     {
+        outputRight.setVelocityPIDFCoefficients(shooterP, shooterI, shooterD, shooterF);
+        outputLeft.setVelocityPIDFCoefficients(shooterP, shooterI, shooterD, shooterF);
+
         outputRight.setVelocity(velocity);
         outputLeft.setVelocity(velocity);
         carousel.setPower(-1);
-
-
         shootTimer.resetTimer();
         isShooting=true;
     }
@@ -175,13 +199,29 @@ public class LibraryPedro
     {
         if (isShooting)
         {
-            if (shootTimer.getElapsedTimeSeconds()>3.0)
+            if(shootTimer.getElapsedTimeSeconds() > 2.67)
             {
                 carousel.setPower(0);
                 outputLeft.setVelocity(0);
                 outputRight.setVelocity(0);
                 isShooting = false;
             }
+        }
+    }
+    public String getBallColor() {
+        return checkRGB();
+    }
+    public boolean isBall()
+    {
+        if(colorSensor.red()>=40)
+        {
+          //check if there is a ball. if there is spin for an amount of time to nexct position
+            //carouselStart();
+            ball++;
+            return true;// if not do nothing, needs to stop at 3rd ball
+        }
+        else {
+            return false;
         }
     }
 
@@ -207,7 +247,6 @@ public class LibraryPedro
 //                telemetry.addData("Color:", "Purple, Purple, Green");
             }
 
-
             else if(detectedTagId == 22)
             {
                 motif = "pgp";
@@ -224,38 +263,98 @@ public class LibraryPedro
         return motif;
     }
 
-//    public void orderBalls(String motif, String order)
-//    {
-//        //Moves the gate to the front area of the carousel, the values are absolute
-//        gate.setPosition(0.67);
-//
-//        telemetry.addData("Motif: ", motif);
-//        telemetry.addData("Order: ", order);
-//        telemetry.update();
-//
-//        if(orderPossible(order))
-//        {
-//            while(!motif.equals(order))
-//            {
-//                //Spins the carousel to the next section
-//                carousel.setPower(0.25);
-//                opMode.sleep(1250);
-//
-//                //Stops the carousel from spinning
-//                carousel.setPower(0);
-//                opMode.sleep(1000);
-//
-//                //Move the last item in the string to the front
-//                order = order.substring(2) + order.substring(0,2);
-//            }
-//        }
-//        telemetry.addData("Motif: ", motif);
-//        telemetry.addData("Order: ", order);
-//        telemetry.addData("Is It Possible: ", orderPossible(order));
-//        telemetry.update();
-//
-//        gate.setPosition(0.95);
-//    }
+    //
+    //    //Checks what type of ball is there and returns a string depending on what is there
+        //g for a green ball
+        //p for a purple ball
+        //n for no ball
+    //    If the color sensor is pointing at the hole, it wont detect the balls color and would print n
+        private String checkRGB() {
+            int red = colorSensor.red();
+            int green = colorSensor.green();
+            int blue = colorSensor.blue();
+
+            //This else if statements checks if there is a purple ball there
+            //The red value for a purple ball is 2440 - 2445
+            //The green value for a purple ball is 2945 - 2960
+            //The blue value for a purple ball is 4945 - 4950
+            //Leaving a buffer of about 1000
+            if (blue >= 3000 && red >= 1750)
+            {
+                return "p";
+            }
+            //Prints out there is a green ball
+            //The red value for a green ball is 690 - 695
+            //The green value for a green ball is 2685 - 2690
+            //The blue value for a green ball is 1985 - 1990
+            //Leaving a buffer of about 100
+            else if(blue >= 1000)
+            {
+                return "g";
+            }
+
+            //This if statements checks if there is no ball there
+            //The red value for nothing there is 93 - 95
+            //The green value for nothing there is 151 - 154
+            //The blue value for nothing there is 137 - 139
+            return "n";
+        }
+    public void runTogether(Runnable run1, Runnable run2)
+    {
+        //2 thread objects that run the 2 tasks
+        Thread moveGoal = new Thread(run1);
+        Thread orderBalls = new Thread(run2);
+
+        //Starts both of the threads
+        moveGoal.start();
+        orderBalls.start();
+
+        //Joins the 2 threads back to the main thread
+        try
+        {
+            moveGoal.join();
+            orderBalls.join();
+        }
+        //If they have an error, it passes a error in the log
+        catch (InterruptedException e)
+        {
+            telemetry.addData("Joining Threads: ", "Failed");
+            telemetry.update();
+        }
+    }
+    public void orderBalls(String motif, String order)
+    {
+//        isDoneIntaking=true;
+        //Moves the gate to the front area of the carousel, the values are absolute
+        gate.setPosition(0.67);
+
+        telemetry.addData("Motif: ", motif);
+        telemetry.addData("Order: ", order);
+        telemetry.update();
+
+        while(!motif.equals(order))
+        {
+            isDoneSpindexing=false;
+                //Spins the carousel to the next section
+                orderTimer.resetTimer();
+                while (orderTimer.getElapsedTimeSeconds() < 1.25) {
+                    carousel.setPower(0.25);
+                }
+                //Stops the carousel from spinning
+                carousel.setPower(0);
+                if (orderTimer.getElapsedTimeSeconds() > 2.5)
+                {
+                    //Move the last item in the string to the front
+                    order = order.substring(2) + order.substring(0, 2);
+                }
+        }
+        telemetry.addData("Motif: ", motif);
+        telemetry.addData("Order: ", order);
+        telemetry.update();
+
+        gate.setPosition(0.95);
+        isDoneSpindexing=true;
+    }
 //
 //    private boolean orderPossible(String order)
 //    {
@@ -299,39 +398,3 @@ public class LibraryPedro
 //        //Returns the string filled with the correct order
 //        return order;
     }
-//
-//    //Checks what type of ball is there and returns a string depending on what is there
-    //g for a green ball
-    //p for a purple ball
-    //n for no ball
-    //If the color sensor is pointing at the hole, it wont detect the balls color and would print n
-//    private String checkRGB() {
-//        int red = colorSensor.red();
-//        int green = colorSensor.green();
-//        int blue = colorSensor.blue();
-//
-//        //This else if statements checks if there is a purple ball there
-//        //The red value for a purple ball is 2440 - 2445
-//        //The green value for a purple ball is 2945 - 2960
-//        //The blue value for a purple ball is 4945 - 4950
-//        //Leaving a buffer of about 1000
-//        if (blue >= 3000 && red >= 1750)
-//        {
-//            return "p";
-//        }
-//        //Prints out there is a green ball
-//        //The red value for a green ball is 690 - 695
-//        //The green value for a green ball is 2685 - 2690
-//        //The blue value for a green ball is 1985 - 1990
-//        //Leaving a buffer of about 100
-//        else if(blue >= 1000)
-//        {
-//            return "g";
-//        }
-//
-//        //This if statements checks if there is no ball there
-//        //The red value for nothing there is 93 - 95
-//        //The green value for nothing there is 151 - 154
-//        //The blue value for nothing there is 137 - 139
-//        return "n";
-//    }

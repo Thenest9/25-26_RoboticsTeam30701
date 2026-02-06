@@ -5,6 +5,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
@@ -40,10 +41,13 @@ public class VvhsTeleop extends LinearOpMode {
     double motorSpeed = 1;
     double carouselPower = 0.67;
 
-    final double shooterP = 40.132;
-    final double shooterI = 0;
-    final double shooterD = 0;
-    final double shooterF = 13.727;
+    double shooterP = 48.72995;
+    double shooterI = 0;
+    double shooterD = 0;
+    double shooterF = 13.13319;
+    double ShootingVelocity = 1267;
+
+    double distance;
     @Override
     public void runOpMode()//initalizes all Motors and servos.
     {
@@ -69,7 +73,7 @@ public class VvhsTeleop extends LinearOpMode {
         ramp = hardwareMap.get(DcMotor.class, "rampIntakeOuttake");
         gate = hardwareMap.get(Servo.class, "gate");
 
-
+        ColorSensor colorSensor = hardwareMap.get(ColorSensor.class, "colorSensor");
         limelight = hardwareMap.get(Limelight3A.class, "limelight");
         limelight.pipelineSwitch(7);
         limelight.start();
@@ -97,16 +101,18 @@ public class VvhsTeleop extends LinearOpMode {
         touchSensorBot = hardwareMap.get(DigitalChannel.class, "touchSensorDown");
         touchSensorBot.setMode(DigitalChannel.Mode.INPUT);
 
+        Library lib = new Library(FrontLeft, FrontRight, RearLeft, RearRight, this, outputRight, outputLeft, carousel, telemetry, limelight, intake, ramp, gate,colorSensor);
 
         while (opModeIsActive()) {
             ChangeMotorPowerSpeed();
             moveRobot();
             CarouselMovement();
             TurnRobot();
-            LaunchMotors(1400);
+            LaunchMotors(ShootingVelocity);
             IntakeBalls();
             gateMovement();
             rampMovement();
+            telemetry.addData("Motor Speed is : ", motorSpeed);
             telemetry.update();
         }
     }
@@ -119,26 +125,34 @@ public class VvhsTeleop extends LinearOpMode {
         {
             telemetry.addData("dpad_up", "called");
             //If motor speed is less then 1 then increase by .1
-            speedIndex += speedIndex < moveSpeeds.length - 1 ? 1 : 0;
-            if (!(motorSpeed >= 0.9))
+//            speedIndex += speedIndex < moveSpeeds.length - 1 ? 1 : 0;
+            if ((motorSpeed < 1))
             {
-                motorSpeed += 0.3;
+                motorSpeed += 0.2;
                 telemetry.addData("Motor Speed is : ", motorSpeed);
+            }
+            if(motorSpeed > 0.5)
+            {
+                motorSpeed = 1;
             }
         }
         if (gamepad1.dpadDownWasPressed())//M2
         {
             telemetry.addData("dpad_down", "called");
             //If motor speed is greater then -1 then decrease by .1
-            speedIndex += speedIndex > 0 ? -1 : 0;
+//            speedIndex += speedIndex > 0 ? -1 : 0;
+            if(motorSpeed > 0.3)
+            {
+                motorSpeed-=0.2;
+            }
+            if(motorSpeed > 0.5)
+            {
+                motorSpeed = 0.5;
+            }
             telemetry.addData("Motor Speed is : ", motorSpeed);
         }
-        motorSpeed = moveSpeeds[speedIndex];
 
-
-        if (!(motorSpeed <= 0.3)) {
-            motorSpeed -= 0.3;
-        }
+//        motorSpeed = moveSpeeds[speedIndex];
     }
 
 
@@ -251,6 +265,7 @@ public class VvhsTeleop extends LinearOpMode {
         //outputRight.setVelocity(2800);
         if (gamepad2.right_trigger > 0.4)
         {
+
             telemetry.addData("Shooting velo", outputRight.getVelocity());
             telemetry.addData("Shooting Motor Speed", outputRight.getPower());
             outputRight.setVelocity(outputMotorVelocity);
@@ -311,6 +326,7 @@ public class VvhsTeleop extends LinearOpMode {
         if (gamepad2.triangle || gamepad1.triangle)
         {
             ramp.setPower(0.5);
+            intake.setPower(1);
             telemetry.addData("Ramp Status: ", "Going UP");
             if (!touchSensorTop.getState())
             {
@@ -325,9 +341,11 @@ public class VvhsTeleop extends LinearOpMode {
         if (gamepad2.cross || gamepad1.cross)
         {
             ramp.setPower(-0.3);
+            intake.setPower(-1);
             telemetry.addData("Ramp Status: ", " Going DOWN");
             if (!touchSensorBot.getState())
             {
+
                 gamepad2.rumble(1, 1, 500);
                 gamepad1.rumble(1, 1, 500);
             }
@@ -335,6 +353,7 @@ public class VvhsTeleop extends LinearOpMode {
         else
         {
             ramp.setPower(0);
+            intake.setPower(0);
             telemetry.addData("Ramp Status: ", "Not moving");
         }
 
