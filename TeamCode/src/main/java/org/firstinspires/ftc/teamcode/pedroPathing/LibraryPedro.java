@@ -138,6 +138,7 @@ public class LibraryPedro
         carTimer.resetTimer();
         isIntaking = true;
     }
+    
     public void carouselStart()
     {
         carTimer.resetTimer();
@@ -199,7 +200,7 @@ public class LibraryPedro
     {
         if (isShooting)
         {
-            if(shootTimer.getElapsedTimeSeconds() > 2.67)
+            if(shootTimer.getElapsedTimeSeconds() > 1.5)
             {
                 carousel.setPower(0);
                 outputLeft.setVelocity(0);
