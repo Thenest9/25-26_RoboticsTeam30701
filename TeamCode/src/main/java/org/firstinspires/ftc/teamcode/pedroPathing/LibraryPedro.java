@@ -59,6 +59,9 @@ public class LibraryPedro
 
     DigitalChannel touchSensorBot;
     DigitalChannel touchSensorTop;
+
+    DigitalChannel MagLimitSwitch;
+
     public boolean isShooting;
     public boolean isIntaking=false;
     public boolean isCarMoving;
@@ -75,7 +78,7 @@ public class LibraryPedro
     double shooterF = 13.13319;
 
 
-    public LibraryPedro(DcMotorEx oR, DcMotorEx oL, CRServo c, Telemetry t, Limelight3A ll, DcMotor i, DcMotor r, Servo g, ColorSensor cs, DigitalChannel top, DigitalChannel bot)
+    public LibraryPedro(DcMotorEx oR, DcMotorEx oL, CRServo c, Telemetry t, Limelight3A ll, DcMotor i, DcMotor r, Servo g, ColorSensor cs, DigitalChannel top, DigitalChannel bot, DigitalChannel mag)
     {
         outputRight = oR;
         outputLeft = oL;
@@ -88,6 +91,7 @@ public class LibraryPedro
         colorSensor = cs;
         touchSensorTop = top;
         touchSensorBot = bot;
+        MagLimitSwitch = mag;
 
         shootTimer = new Timer();
         intakeTimer = new Timer();
@@ -100,6 +104,9 @@ public class LibraryPedro
     public LibraryPedro()
     {
 
+    }
+
+    public LibraryPedro(DcMotorEx outputRight, DcMotorEx outputLeft, CRServo carousel, Telemetry telemetry, Limelight3A limelight, DcMotor intake, DcMotor ramp, Servo gate, ColorSensor colorSensor, DigitalChannel touchSensorTop, DigitalChannel touchSensorBot) {
     }
 
     public double getShootTimer()
@@ -132,6 +139,10 @@ public class LibraryPedro
     }
     public void IntakeStart()
     {
+        while (MagLimitSwitch.getState())
+        {
+            carousel.setPower(0.3);
+        }
         intake.setPower(0.9);
         ball = 0;
         intakeTimer.resetTimer();

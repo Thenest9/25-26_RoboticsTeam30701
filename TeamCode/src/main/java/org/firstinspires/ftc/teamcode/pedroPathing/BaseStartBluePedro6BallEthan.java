@@ -266,7 +266,7 @@ public class BaseStartBluePedro6BallEthan extends OpMode
         buildPaths();
         follower.setStartingPose(startPose);
 
-        lib = new LibraryPedro(outputRight, outputLeft, carousel, telemetry, limelight, intake, ramp, gate, colorSensor, touchSensorTop, touchSensorBot);
+        lib = new LibraryPedro(outputRight, outputLeft, carousel, telemetry, limelight, intake, ramp, gate, colorSensor, touchSensorTop, touchSensorBot, magSwitch);
 
     }
 
@@ -295,10 +295,6 @@ public class BaseStartBluePedro6BallEthan extends OpMode
 
         autonomousPathUpdate();
         drawDebug(follower);
-//        if(currMotif.isEmpty())
-//        {
-//            currMotif=lib.getMotif();
-//        }
 
         telemetry.addData("path state", pathState);
         telemetry.addData("x", follower.getPose().getX());
