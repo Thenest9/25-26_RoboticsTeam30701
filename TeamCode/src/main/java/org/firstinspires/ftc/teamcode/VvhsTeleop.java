@@ -29,6 +29,8 @@ public class VvhsTeleop extends LinearOpMode {
     DigitalChannel touchSensorBot;
     DigitalChannel touchSensorTop;
 
+    DigitalChannel magSwitch;
+
 
     Servo gate;
     DcMotor ramp;
@@ -101,6 +103,9 @@ public class VvhsTeleop extends LinearOpMode {
         touchSensorBot = hardwareMap.get(DigitalChannel.class, "touchSensorDown");
         touchSensorBot.setMode(DigitalChannel.Mode.INPUT);
 
+        magSwitch = hardwareMap.get(DigitalChannel.class, "magneticLimitSwitch");
+        magSwitch.setMode(DigitalChannel.Mode.INPUT);
+
         Library lib = new Library(FrontLeft, FrontRight, RearLeft, RearRight, this, outputRight, outputLeft, carousel, telemetry, limelight, intake, ramp, gate,colorSensor);
 
         while (opModeIsActive()) {
@@ -114,6 +119,15 @@ public class VvhsTeleop extends LinearOpMode {
             rampMovement();
             telemetry.addData("Motor Speed is : ", motorSpeed);
             telemetry.update();
+
+            if(magSwitch.getState())
+            {
+                telemetry.addData("Carsouel","Moving");
+            }
+            else
+            {
+                telemetry.addData("Carsouel","Not Moving");
+            }
         }
     }
 
