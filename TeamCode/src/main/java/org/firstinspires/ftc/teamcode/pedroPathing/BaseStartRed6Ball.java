@@ -152,6 +152,7 @@ public class BaseStartRed6Ball extends OpMode
                 {
                     follower.followPath(Path2, true);
                     // starts intake
+                    lib.rampDown();
                     lib.IntakeStart();
                     setPathState(3);
                 }
