@@ -278,18 +278,15 @@ public class BaseStartBluePedro6Ball extends OpMode
             if(lib.isBall()) {
                 lib.carouselStart();
             }
-            else
-            {
-                carousel.setPower(0);
-            }
+           carousel.setPower(0);
+        }
+        else
+        {
+            carousel.setPower(0);
         }
 
         autonomousPathUpdate();
         drawDebug(follower);
-//        if(currMotif.isEmpty())
-//        {
-//            currMotif=lib.getMotif();
-//        }
 
         telemetry.addData("path state", pathState);
         telemetry.addData("x", follower.getPose().getX());
