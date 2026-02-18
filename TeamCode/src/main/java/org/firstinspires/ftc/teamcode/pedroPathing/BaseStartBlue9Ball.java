@@ -192,7 +192,7 @@ public class BaseStartBlue9Ball extends OpMode
         touchSensorTop.setMode(DigitalChannel.Mode.INPUT);
 
         //Initialize the touch sensor at the top of the ramp
-        touchSensorBot = hardwareMap.get(DigitalChannel.class, "touchSensorDown");
+        touchSensorBot = hardwareMap.get(DigitalChannel.class, "touchSensorBot");
         touchSensorBot.setMode(DigitalChannel.Mode.INPUT);
 
         //Creating the follower object so the robot knows to follow certain paths
