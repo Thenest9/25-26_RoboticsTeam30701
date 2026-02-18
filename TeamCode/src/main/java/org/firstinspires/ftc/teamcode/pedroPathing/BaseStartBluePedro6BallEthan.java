@@ -279,18 +279,14 @@ public class BaseStartBluePedro6BallEthan extends OpMode
         lib.finishIntake();
         if(lib.isIntaking)
         {
-            if(lib.isBall())
-            {
-                while(magSwitch.getState())
-                {
-                    carousel.setPower(0.5);
-                }
-                carousel.setPower(0);
+            if(lib.isBall()) {
+                lib.carouselStart();
             }
-            else
-            {
-                carousel.setPower(0);
-            }
+            carousel.setPower(0);
+        }
+        else
+        {
+            carousel.setPower(0);
         }
 
         autonomousPathUpdate();
