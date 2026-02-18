@@ -214,23 +214,6 @@ public class BaseStartBlue9Ball extends OpMode
 
     */
 
-    //Code that is ran at the start when the play button is ran
-    public void start()
-    {
-        //Closes the get
-        gateClose();
-
-        //Puts the ramp up
-        rampUp();
-
-        //Makes sure the carousel isn't moving
-        carousel.setPower(0);
-
-        //Makes sure the flywheels are not moving
-        outputLeft.setVelocity(0);
-        outputRight.setVelocity(0);
-    }
-
 
 
     //------------------------RUNNING CODE-----------------------//
@@ -595,7 +578,7 @@ public class BaseStartBlue9Ball extends OpMode
     public void rampUp()
     {
         //While the sensor on the top is not getting clicked
-        while(touchSensorTop.getState())
+        while(!touchSensorTop.getState())
         {
             //Set the ramp to go up, and the intake to go inwards
             ramp.setPower(0.5);
