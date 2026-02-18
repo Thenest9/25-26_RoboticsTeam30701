@@ -143,16 +143,13 @@ public class LibraryPedro
     public void carouselStart()
     {
         carTimer.resetTimer();
-        if(isBall() && carTimer.getElapsedTimeSeconds()<1.25)//while mag switch is true then move, ball++
+        while(magneticLimitSwitch.getState())
         {
             carousel.setPower(0.3);
             isCarMoving = true;
         }
-        else
-        {
             carTimer.resetTimer();
             carousel.setPower(0);
-        }
     }
     public void finishIntake()//called in the loop function, continously checks
     {
