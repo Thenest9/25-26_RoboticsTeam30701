@@ -224,7 +224,6 @@ public class LibraryPedro
         if(colorSensor.red()>=40)
         {
           //check if there is a ball. if there is spin for an amount of time to nexct position
-            //carouselStart();
             ball++;
             return true;// if not do nothing, needs to stop at 3rd ball
         }
