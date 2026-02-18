@@ -205,7 +205,6 @@ public class BaseStartBluePedro6Ball extends OpMode
     public void setPathState(int pState) {
         pathState = pState;
         pathTimer.resetTimer();
-//        step=0;
     }
 
     @Override

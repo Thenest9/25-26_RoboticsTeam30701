@@ -162,7 +162,7 @@ public class BaseStartBluePedro6BallEthan extends OpMode
                 if(!follower.isBusy() && !lib.isShooting && pathTimer.getElapsedTimeSeconds()>3)
                 {
                     lib.rampDown();
-                    follower.followPath(collect11, true);//infront of row 1 to intake
+                    follower.followPath(collect11, true);//moves infront of row 1 to intake, sets correct angle
                     lib.IntakeStart();//starts intake
                     setPathState(3);//moves onto next path
                 }
