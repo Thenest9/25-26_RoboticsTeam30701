@@ -41,6 +41,7 @@ public class BaseStartBluePedro6Ball extends OpMode
     CRServo carousel;
     DigitalChannel touchSensorBot;
     DigitalChannel touchSensorTop;
+    DigitalChannel magSwitch;
 
     //Making the gate to have the gate open or closed depending on intake or output
     Servo gate;
@@ -249,6 +250,10 @@ public class BaseStartBluePedro6Ball extends OpMode
         touchSensorBot = hardwareMap.get(DigitalChannel.class, "touchSensorDown");
         touchSensorBot.setMode(DigitalChannel.Mode.INPUT);
 
+
+        magSwitch = hardwareMap.get(DigitalChannel.class, "magneticLimitSwitch");
+        magSwitch.setMode(DigitalChannel.Mode.INPUT);
+
         // Initialize the library class through a lib object
 
         pathTimer = new Timer();
@@ -261,7 +266,7 @@ public class BaseStartBluePedro6Ball extends OpMode
         buildPaths();
         follower.setStartingPose(startPose);
 
-        lib = new LibraryPedro(outputRight, outputLeft, carousel, telemetry, limelight, intake, ramp, gate, colorSensor, touchSensorTop, touchSensorBot);
+        lib = new LibraryPedro(outputRight, outputLeft, carousel, telemetry, limelight, intake, ramp, gate, colorSensor, touchSensorTop, touchSensorBot, magSwitch);
 
     }
 

@@ -128,15 +128,13 @@ public class BaseStartBluePedro6BallEthan extends OpMode
                 motifTimer.resetTimer();
                 setPathState(1);
                 break;
-            case 1://path 10 case,
+            case 1://get motif then shoot
                 switch (step)
                 {
                     case 0:
-                        if(motifTimer.getElapsedTimeSeconds()>1 && currMotif.isEmpty())
+                        if(motifTimer.getElapsedTimeSeconds()>1 && currMotif.isEmpty() && !follower.isBusy())
                         {
                             currMotif = lib.getMotif();
-                        }
-                        if(!follower.isBusy()) {
                             follower.followPath(shootingPose, true);
                             step = 1;
                         }
