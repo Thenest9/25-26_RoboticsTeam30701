@@ -130,6 +130,10 @@ public class BaseStartBluePedro6Ball extends OpMode
                 {
                     currMotif = lib.getMotif();
                 }
+                if(!currMotif.isEmpty())
+                {
+                    lib.orderBalls(currMotif,"ppg");
+                }
                 setPathState(1);
                 break;
             case 1://path 10 case, 
