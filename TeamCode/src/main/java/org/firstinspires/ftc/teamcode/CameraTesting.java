@@ -1,6 +1,8 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.pedropathing.util.Timer;
 import com.qualcomm.hardware.limelightvision.LLResult;
+import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -9,6 +11,7 @@ import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.Servo;
 
 @TeleOp(name = "Camera Testing")
@@ -21,6 +24,8 @@ public class CameraTesting extends LinearOpMode
     DcMotor ramp;
     CRServo carousel;
     ColorSensor colorSensor;
+    DigitalChannel magneticLimitSwitch;
+
 
     int goalPiplineRed = 5;
     int goalPiplineBlue = 6;
@@ -32,6 +37,9 @@ public class CameraTesting extends LinearOpMode
     final double shooterD = 0;
     final double shooterF = 13.727;
 
+    String motif = "";
+
+    private Timer orderTimer;
     @Override
     public void runOpMode()
     {
@@ -65,6 +73,8 @@ public class CameraTesting extends LinearOpMode
         limelight.pipelineSwitch(motifPipline);
         limelight.start();
 
+        magneticLimitSwitch = hardwareMap.get(DigitalChannel.class, "magneticLimitSwitch");
+        magneticLimitSwitch.setMode(DigitalChannel.Mode.INPUT);
         telemetry.setMsTransmissionInterval(11);
 
 
@@ -74,8 +84,8 @@ public class CameraTesting extends LinearOpMode
 
         if(opModeIsActive())
         {
-            turnToGoal(goalPiplineBlue);
-
+            motif = getMotif();
+            orderBalls(motif,"ppg");
             telemetry.update();
         }
     }
@@ -156,5 +166,73 @@ public class CameraTesting extends LinearOpMode
 
         // Stop all motors when aligned
         setMotorsPower(0, 0, 0, 0);
+    }
+    public void orderBalls(String motif, String order)
+    {
+//        isDoneIntaking=true;
+        //Moves the gate to the front area of the carousel, the values are absolute
+        gate.setPosition(0.67);
+
+        telemetry.addData("Motif: ", motif);
+        telemetry.addData("Order: ", order);
+        telemetry.update();
+
+        while(!motif.equals(order))
+        {
+            //isDoneSpindexing=false;
+            //Spins the carousel to the next section
+            orderTimer.resetTimer();
+            while (magneticLimitSwitch.getState())
+            {
+                carousel.setPower(0.3);
+            }
+            //Stops the carousel from spinning
+            carousel.setPower(0);
+            //Move the last item in the string to the front
+            order = order.substring(2) + order.substring(0, 2);
+        }
+        telemetry.addData("Motif: ", motif);
+        telemetry.addData("Order: ", order);
+        telemetry.update();
+
+        gate.setPosition(0.95);
+        //isDoneSpindexing=true;
+    }
+    public String getMotif()
+    {
+        String motif = "";
+        limelight.pipelineSwitch(7);
+        LLResult result = limelight.getLatestResult();
+
+        //Pipeline that is prepared to check for the tags of the motifs
+
+
+        if (result.isValid() && !result.getFiducialResults().isEmpty())
+        {
+            //Gets the ID number of the tag; the number is an int; either 21, 22, or 23
+            LLResultTypes.FiducialResult fiducial = result.getFiducialResults().get(0);
+            int detectedTagId = fiducial.getFiducialId();
+            telemetry.addData("AprilTag ID", detectedTagId);
+
+            if (detectedTagId == 23)
+            {
+                motif = "ppg";
+//                telemetry.addData("Color:", "Purple, Purple, Green");
+            }
+
+            else if(detectedTagId == 22)
+            {
+                motif = "pgp";
+//                telemetry.addData("Color:", "Purple, Green, Purple");
+            }
+
+
+            else if(detectedTagId == 21)
+            {
+                motif = "gpp";
+//                telemetry.addData("Color:", "Green, Purple, Purple");
+            }
+        }
+        return motif;
     }
 }
