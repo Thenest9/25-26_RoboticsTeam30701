@@ -70,6 +70,7 @@ public class LibraryPedro
     private Timer carTimer;
     private Timer orderTimer;
     private int ball;
+    private boolean wasBallPresent;
     double shooterP = 48.72995;
     double shooterI = 0;
     double shooterD = 0;
@@ -136,6 +137,7 @@ public class LibraryPedro
     {
         intake.setPower(0.9);
         ball = 0;
+        wasBallPresent = false;
         intakeTimer.resetTimer();
         carTimer.resetTimer();
         isIntaking = true;
@@ -155,7 +157,7 @@ public class LibraryPedro
     {
         if(isIntaking)
         {
-            if(intakeTimer.getElapsedTimeSeconds()>5)//if ball count is 2 stop intaking
+            if(ball >= 2 || intakeTimer.getElapsedTimeSeconds()>5)//if ball count is 2 stop intaking
             {
                 intake.setPower(0);
                 carousel.setPower(0.0);
@@ -213,16 +215,17 @@ public class LibraryPedro
     }
     public boolean isBall()
     {
-        if(colorSensor.red()>=40)
+        boolean ballPresent = colorSensor.red()>=40;
+        if(ballPresent && !wasBallPresent)
         {
             //check if there is a ball. if there is spin for an amount of time to nexct position
             //carouselStart();
             ball++;
+            wasBallPresent = true;
             return true;// if not do nothing, needs to stop at 3rd ball
         }
-        else {
-            return false;
-        }
+        wasBallPresent = ballPresent;
+        return false;
     }
 
     public String getMotif()
