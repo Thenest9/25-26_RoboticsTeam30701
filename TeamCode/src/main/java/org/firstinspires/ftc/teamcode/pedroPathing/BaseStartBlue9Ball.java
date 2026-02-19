@@ -134,6 +134,8 @@ public class BaseStartBlue9Ball extends OpMode
     //Where the robot has to end up while intaking
     Pose correctPose = null;
 
+    public String rampPos = "up";
+
 
     //------------------------FINISH DEFINING VARIABLES------------------------//
 
@@ -221,6 +223,8 @@ public class BaseStartBlue9Ball extends OpMode
     {
         //Updates the pedropathing so even if you move it, it always stays on the position it needs to be
         follower.update();
+
+        keepRampStill();
 
         //Switches to the case currentState is on
         switch (currentState)
@@ -587,6 +591,7 @@ public class BaseStartBlue9Ball extends OpMode
         //Turn the ramp and the intake off
         ramp.setPower(0);
         intake.setPower(0);
+        rampPos = "up";
     }
 
     //A method to put the ramp down
@@ -602,7 +607,7 @@ public class BaseStartBlue9Ball extends OpMode
         //Turn the ramp and the intake off
         ramp.setPower(0.0);
         intake.setPower(0.0);
-
+        rampPos = "down";
     }
 
     //Opens the gate to be able to spindex
@@ -649,6 +654,18 @@ public class BaseStartBlue9Ball extends OpMode
             sortingDone = true;
         });
         OrderBalls.start();
+    }
+
+    public void keepRampStill()
+    {
+        if(rampPos.equals("up"))
+        {
+            ramp.setPower(0.05);
+        }
+        else
+        {
+            ramp.setPower(-0.05);
+        }
     }
 
 
