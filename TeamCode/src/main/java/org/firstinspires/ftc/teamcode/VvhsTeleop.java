@@ -69,7 +69,6 @@ public class VvhsTeleop extends LinearOpMode {
 
 
         carousel = hardwareMap.get(CRServo.class, "Carousel");
-        //doesn't have a class yet
         ramp = hardwareMap.get(DcMotor.class, "rampIntakeOuttake");
         gate = hardwareMap.get(Servo.class, "gate");
 
@@ -98,7 +97,7 @@ public class VvhsTeleop extends LinearOpMode {
         touchSensorTop.setMode(DigitalChannel.Mode.INPUT);
 
 
-        touchSensorBot = hardwareMap.get(DigitalChannel.class, "touchSensorDown");
+        touchSensorBot = hardwareMap.get(DigitalChannel.class, "touchSensorBot");
         touchSensorBot.setMode(DigitalChannel.Mode.INPUT);
 
         Library lib = new Library(FrontLeft, FrontRight, RearLeft, RearRight, this, outputRight, outputLeft, carousel, telemetry, limelight, intake, ramp, gate,colorSensor);

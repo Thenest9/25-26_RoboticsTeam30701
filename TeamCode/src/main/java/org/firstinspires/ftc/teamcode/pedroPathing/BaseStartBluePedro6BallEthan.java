@@ -24,7 +24,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.Library;
 
-@Autonomous(name = "Base Start Blue 6 ball sorted", group = "Autonomous") // Panels
+@Autonomous(name = "Base Start Blue 6 ball Ethans UNCHANGEd", group = "Autonomous") // Panels
 public class BaseStartBluePedro6BallEthan extends OpMode
 {
     Limelight3A limelight;
@@ -246,11 +246,11 @@ public class BaseStartBluePedro6BallEthan extends OpMode
         touchSensorTop.setMode(DigitalChannel.Mode.INPUT);
 
 
-        touchSensorBot = hardwareMap.get(DigitalChannel.class, "touchSensorDown");
+        touchSensorBot = hardwareMap.get(DigitalChannel.class, "touchSensorBot");
         touchSensorBot.setMode(DigitalChannel.Mode.INPUT);
 
 
-        magSwitch = hardwareMap.get(DigitalChannel.class, "magneticLimitSwitch");
+        magSwitch = hardwareMap.get(DigitalChannel.class, "magSwitch");
         magSwitch.setMode(DigitalChannel.Mode.INPUT);
         // Initialize the library class through a lib object
 
@@ -259,6 +259,9 @@ public class BaseStartBluePedro6BallEthan extends OpMode
         actionTimer =  new Timer();
         opmodeTimer.resetTimer();
         motifTimer = new Timer();
+
+
+        currMotif="";
 
         follower = Constants.createFollower((hardwareMap));
         buildPaths();

@@ -145,7 +145,7 @@ public class LibraryPedro
         carTimer.resetTimer();
         while(magneticLimitSwitch.getState())
         {
-            carousel.setPower(0.3);
+            carousel.setPower(0.2);
             isCarMoving = true;
         }
             carTimer.resetTimer();
@@ -191,6 +191,7 @@ public class LibraryPedro
         outputRight.setVelocity(velocity);
         outputLeft.setVelocity(velocity);
         carousel.setPower(-1);
+        ramp.setPower(0.3);
         shootTimer.resetTimer();
         isShooting=true;
     }
