@@ -334,29 +334,30 @@ public class LibraryPedro
         telemetry.addData("Motif: ", motif);
         telemetry.addData("Order: ", order);
         telemetry.update();
-
         while(!motif.equals(order))
         {
-            isDoneSpindexing=false;
+            //isDoneSpindexing=false;
             //Spins the carousel to the next section
-            orderTimer.resetTimer();
-            while (orderTimer.getElapsedTimeSeconds() < 1.25) {
-                carousel.setPower(0.25);
+            while(!magneticLimitSwitch.getState())
+            {
+                carousel.setPower(0.2);
+            }
+            carousel.setPower(0);
+            while(magneticLimitSwitch.getState())
+            {
+                carousel.setPower(0.3);
             }
             //Stops the carousel from spinning
             carousel.setPower(0);
-            if (orderTimer.getElapsedTimeSeconds() > 2.5)
-            {
-                //Move the last item in the string to the front
-                order = order.substring(2) + order.substring(0, 2);
-            }
+            //Move the last item in the string to the front
+            order = order.substring(2) + order.substring(0, 2);
         }
         telemetry.addData("Motif: ", motif);
         telemetry.addData("Order: ", order);
         telemetry.update();
 
         gate.setPosition(0.95);
-        isDoneSpindexing=true;
+        //isDoneSpindexing=true;
     }
 //
 //    private boolean orderPossible(String order)

@@ -39,7 +39,7 @@ public class CameraTesting extends LinearOpMode
 
     String motif = "";
 
-    private Timer orderTimer;
+
     @Override
     public void runOpMode()
     {
@@ -73,7 +73,7 @@ public class CameraTesting extends LinearOpMode
         limelight.pipelineSwitch(motifPipline);
         limelight.start();
 
-        magneticLimitSwitch = hardwareMap.get(DigitalChannel.class, "magneticLimitSwitch");
+        magneticLimitSwitch = hardwareMap.get(DigitalChannel.class, "magSwitch");
         magneticLimitSwitch.setMode(DigitalChannel.Mode.INPUT);
         telemetry.setMsTransmissionInterval(11);
 
@@ -179,13 +179,16 @@ public class CameraTesting extends LinearOpMode
         telemetry.addData("Motif: ", motif);
         telemetry.addData("Order: ", order);
         telemetry.update();
-
         while(!motif.equals(order))
         {
             //isDoneSpindexing=false;
             //Spins the carousel to the next section
-            orderTimer.resetTimer();
-            while (magneticLimitSwitch.getState())
+            while(!magneticLimitSwitch.getState())
+            {
+                carousel.setPower(0.2);
+            }
+            carousel.setPower(0);
+            while(magneticLimitSwitch.getState())
             {
                 carousel.setPower(0.3);
             }
