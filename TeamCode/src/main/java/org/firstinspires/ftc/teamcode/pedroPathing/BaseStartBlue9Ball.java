@@ -40,101 +40,116 @@ public class BaseStartBlue9Ball extends OpMode
     //------------------------DEFINING VARIABLES------------------------//
 
     //The camera at the top of the robot used to see the april tags
-    Limelight3A limelight;
+    private Limelight3A limelight;
 
     //Making the DcMotors for the tires, the ramp, and the intake
-    DcMotor FrontLeft, FrontRight, RearLeft, RearRight, intake, ramp;
+    private DcMotor FrontLeft, FrontRight, RearLeft, RearRight, intake, ramp;
 
     //Making the DcMotorEx for the fly wheels
-    DcMotorEx outputRight, outputLeft;
+    private DcMotorEx outputRight, outputLeft;
 
     //Making the colorSensor to be able to check the color of the balls
-    ColorSensor colorSensor;
+    private ColorSensor colorSensor;
 
     //Making the CRServo for the carousel
-    CRServo carousel;
+    private CRServo carousel;
 
     //Making the touch sensors for the ramp so we know when it is all the way up or down
-    DigitalChannel touchSensorBot;
-    DigitalChannel touchSensorTop;
+    private DigitalChannel touchSensorBot;
+    private DigitalChannel touchSensorTop;
 
     //Making the gate to have the gate open or closed depending on intake or output
-    Servo gate;
-
-    //Tuning for the flywheels so they can get to speed faster
-    double shooterP = 48.72995;
-    double shooterI = 0;
-    double shooterD = 0;
-    double shooterF = 13.13319;
+    private Servo gate;
 
     //Used in pedropathing to move the robot along a certain path
     private Follower follower;
 
 
     //The value of the motif
-    public String motif;
+    private String motif;
 
     //The balls currently in the carousel
-    public String order = "ppg";
+    private String order = "ppg";
 
     //A list of options the robot can be doing
-    enum STATES {DRIVE, SHOOT, INTAKE, DONE}
+    private enum STATES {DRIVE, SHOOT, INTAKE, DONE}
 
     //What the robot is currently doing
-    STATES currentState = STATES.DRIVE;
+    private STATES currentState = STATES.DRIVE;
 
     //A list of places the robot could be at
-    enum DRIVESTATES {SHOOT, MOTIF, TOP, MIDDLE, BOT, END}
+    private enum DRIVESTATES {SHOOT, MOTIF, TOP, MIDDLE, BOT, END}
 
     //What the robot is going to start off doing
-    DRIVESTATES driveStates = DRIVESTATES.MOTIF;
+    private DRIVESTATES driveStates = DRIVESTATES.MOTIF;
 
     //Timer so we can shoot the balls in the carousel for only 2.67 seconds
-    public Timer shootTime = new Timer();
+    private final Timer shootTime = new Timer();
 
     //Timer so we know the times for carousel movement during spindexing
-    public Timer spindexTime = new Timer();
+    private final Timer spindexTime = new Timer();
 
     //The following are used to tell if the robot is currently doing something
-    public boolean isShooting = false;
+    private boolean isShooting = false;
 
     //Storing which balls have yet to be intaked by the robot
-    public boolean[] availableBalls = {true, true, true};
+    private final boolean[] availableBalls = {true, true, true};
 
     //Int to know how many balls are in the carousel
-    public int balls = 3;
+    private int balls = 3;
 
-    //Tells the robot weather or not we are intaking
-    boolean isIntaking = false;
+    //Tells the robot whether or not we are intaking
+    private boolean isIntaking = false;
+
+    //Tells the robot whether or not we are moving
+
+    private boolean isMoving = false;
 
 
     //All the way points the robot is going to go, each name tells its own one
-    Pose start = new Pose(20, 122, Math.toRadians(144));
+    private final Pose start = new Pose(20, 122, Math.toRadians(144));
 
-    Pose motifPos = new Pose(53, 90, Math.toRadians(85));
+    private final Pose motifPos = new Pose(53, 90, Math.toRadians(85));
 
-    Pose shoot = new Pose(53, 90, Math.toRadians(144));
+    private final Pose shoot = new Pose(53, 90, Math.toRadians(144));
 
-    Pose topIntakeStart = new Pose(42, 82, Math.toRadians(180));
+    private final Pose topIntakeStart = new Pose(42, 82, Math.toRadians(180));
 
-    Pose topIntakeEnd = new Pose(16, 82, Math.toRadians(180));
+    private final Pose topIntakeEnd = new Pose(16, 82, Math.toRadians(180));
 
-    Pose midIntakeStart = new Pose(42,58,Math.toRadians(180));
+    private final Pose midIntakeStart = new Pose(42,58,Math.toRadians(180));
 
-    Pose midIntakeEnd = new Pose(16,58,Math.toRadians(180));
+    private final Pose midIntakeEnd = new Pose(16,58,Math.toRadians(180));
 
-    Pose gatePos = new Pose(19,70,Math.toRadians(0));
+    private final Pose endPos = new Pose(19,70,Math.toRadians(0));
 
     //A thread which handles the parallel computing part of sorting balls
-    public Thread OrderBalls;
+    private Thread OrderBalls;
 
     //Lets the robot know if the sorting is done yet or not
-    public boolean sortingDone = false;
+    private boolean sortingDone = false;
 
-    //Where the robot has to end up while intaking
-    Pose correctPose = null;
+    //The position the robot will be right before it has to shoot
+    private Pose correctPose = motifPos;
 
-    public String rampPos = "up";
+    private String rampPos = "up";
+
+    private boolean isRampMoving = false;
+
+
+    //Paths the robot is gonna follow
+    private final Path startToMotif = new Path(new BezierLine(start, motifPos));
+
+    private Path correctPoseToShoot = new Path(new BezierLine(correctPose, shoot));
+
+    private Path intakeStartToEnd;
+
+    private final Path shootToTop = new Path(new BezierLine(shoot, topIntakeStart));
+
+    private final Path shootToMid = new Path(new BezierLine(shoot, midIntakeStart));
+
+    private final Path shootToEnd = new Path(new BezierLine(shoot, endPos));;
+
 
 
     //------------------------FINISH DEFINING VARIABLES------------------------//
@@ -158,6 +173,12 @@ public class BaseStartBlue9Ball extends OpMode
     //------------------------DECLARING HARDWARE------------------------//
     public void init()
     {
+        //Tuning for the flywheels so they can get to speed faster
+        final double shooterP = 48.72995;
+        final double shooterI = 0;
+        final double shooterD = 0;
+        final double shooterF = 13.13319;
+
         // Initialize the right wheel of the fly wheel
         outputRight = hardwareMap.get(DcMotorEx.class, "RightOutput");
         outputRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -194,7 +215,7 @@ public class BaseStartBlue9Ball extends OpMode
         touchSensorTop.setMode(DigitalChannel.Mode.INPUT);
 
         //Initialize the touch sensor at the top of the ramp
-        touchSensorBot = hardwareMap.get(DigitalChannel.class, "touchSensorBot");
+        touchSensorBot = hardwareMap.get(DigitalChannel.class, "touchSensorDown");
         touchSensorBot.setMode(DigitalChannel.Mode.INPUT);
 
         //Creating the follower object so the robot knows to follow certain paths
@@ -218,6 +239,8 @@ public class BaseStartBlue9Ball extends OpMode
 
 
 
+
+
     //------------------------RUNNING CODE-----------------------//
     public void loop()
     {
@@ -231,126 +254,175 @@ public class BaseStartBlue9Ball extends OpMode
         {
             //Drives the robot to the next position it needs to go
             case DRIVE:
-                //If the robot is currently driving
-                if(!follower.isBusy())
+                //If the robot needs to drive to the location of the motif
+                if(driveStates == DRIVESTATES.MOTIF)
                 {
-                    //If the robot needs to drive to the location of the motif
-                    if(driveStates == DRIVESTATES.MOTIF)
+                    //When the robot is not driving
+                    if(!isMoving)
                     {
                         //Moving the robot to face the motif
-                        follower.followPath(new Path(new BezierLine(follower.getPose(), motifPos)));
+                        follower.followPath(startToMotif);
 
-                        //Once it is facing the motif, then it gets the motif and looks at the goal
-                        if(follower.atPose(motifPos, 4, 4))
-                        {
-                            //Gets the value of the motif
-                            motif = getMotif();
-
-                            //Lets the robot knwo to start shooting
-                            driveStates = DRIVESTATES.SHOOT;
-
-                            //Starts the shooting thread on the robot
-                            startSorting();
-                        }
+                        //Tells the robot that we are now moving
+                        isMoving = true;
                     }
 
-                    //If the robot needs to drive to the location for it to shoot
-                    else if(driveStates == DRIVESTATES.SHOOT)
+                    //Once it is facing the motif, then it gets the motif and looks at the goal
+                    else if (follower.atPose(motifPos, 4, 4))
                     {
+                        //Lets the robot know we stopped moving
+                        isMoving = false;
 
-                        //Where to move the robot
-                        follower.followPath(new Path(new BezierLine(follower.getPose(), shoot)));
+                        //Gets the value of the motif
+                        motif = getMotif();
 
-                        //If the robot is at the shooting position
-                        if(follower.atPose(shoot, 4, 4))
-                        {
-                            //Tells the robot to know shoot
-                            currentState = STATES.SHOOT;
+                        //Lets the robot know to start shooting
+                        driveStates = DRIVESTATES.SHOOT;
 
-                            //If the balls at the top have not been intaked
-                            if(availableBalls[0])
-                            {
-                                //Tells the robot to drive to the top intake and set the correct
-                                //position to the end of the intakes
-                                driveStates = DRIVESTATES.TOP;
-                                correctPose = topIntakeEnd;
-                            }
-
-                            //If the balls at the mid have not been intaked
-                            else if(availableBalls[1])
-                            {
-                                //Tells the robot to drive to the mid intake and set the correct
-                                //position to the end of the intakes
-                                driveStates = DRIVESTATES.MIDDLE;
-                                correctPose = midIntakeEnd;
-                            }
-
-                            //If both rows have been intaked
-                            else
-                            {
-                                //Tells the robot to park at the end spot
-                                driveStates = DRIVESTATES.END;
-                            }
-                        }
-
-
-                    }
-
-                    //If the robot needs to drive to the location for it to start intaking the top row of balls
-                    else if(driveStates == DRIVESTATES.TOP)
-                    {
-                        //Where to move the robot
-                        follower.followPath(new Path(new BezierLine(follower.getPose(), topIntakeStart)));
-
-                        //Once the robot is at the intaking position
-                        if(follower.atPose(topIntakeStart, 4, 4))
-                        {
-                            //Tells the robot that this row of balls wont be available for intake
-                            availableBalls[0] = false;
-
-                            //Tells the robot to start intaking
-                            currentState = STATES.INTAKE;
-
-                            //Stores the order of the balls in the carousel
-                            order = "ppg";
-                        }
-                    }
-
-                    //If the robot needs to drive to the location for it to start intaking the mid row of balls
-                    else if(driveStates == DRIVESTATES.MIDDLE)
-                    {
-                        //Where to move the robot
-                        follower.followPath(new Path(new BezierLine(follower.getPose(), midIntakeStart)));
-
-                        //Once the robot is at the intaking position
-                        if(follower.atPose(midIntakeStart, 4, 4))
-                        {
-                            //Tells the robot that this row of balls wont be available for intake
-                            availableBalls[1] = false;
-
-                            //Tells the robot to start intaking
-                            currentState = STATES.INTAKE;
-
-                            //Stores the order of the balls in the carousel
-                            order = "pgp";
-                        }
-                    }
-
-                    //If the robot needs to drive to the location to park
-                    else if(driveStates == DRIVESTATES.END)
-                    {
-                        //Where to move the robot
-                        follower.followPath(new Path(new BezierLine(follower.getPose(), gatePos)));
-
-                        //Once the robot is at the end position
-                        if(follower.atPose(gatePos, 4, 4))
-                        {
-                            //Tells the robot that it is done doing things
-                            currentState = STATES.DONE;
-                        }
+                        //Starts the shooting thread on the robot
+                        startSorting();
                     }
                 }
-                break;
+
+                //If the robot needs to drive to the location for it to shoot
+                else if(driveStates == DRIVESTATES.SHOOT)
+                {
+                    //When the robot is not driving
+                    if(!isMoving)
+                    {
+                        //Where to move the robot
+                        follower.followPath(correctPoseToShoot);
+
+                        //Tells the robot that we are now moving
+                        isMoving = true;
+                    }
+
+                    //If the robot is at the shooting position
+                    else if (follower.atPose(shoot, 4, 4))
+                    {
+                        //Lets the robot know we stopped moving
+                        isMoving = false;
+
+                        //Tells the robot to know shoot
+                        currentState = STATES.SHOOT;
+
+                        //If the balls at the top have not been intaked
+                        if(availableBalls[0])
+                        {
+                            //Tells the robot to drive to the top intake and set the correct
+                            //position to the end of the intakes
+                            driveStates = DRIVESTATES.TOP;
+                            correctPose = topIntakeEnd;
+                            correctPoseToShoot = new Path(new BezierLine(correctPose, shoot));
+                            intakeStartToEnd = new Path(new BezierLine(topIntakeStart, topIntakeEnd));
+                        }
+
+                        //If the balls at the mid have not been intaked
+                        else if(availableBalls[1])
+                        {
+                            //Tells the robot to drive to the mid intake and set the correct
+                            //position to the end of the intakes
+                            driveStates = DRIVESTATES.MIDDLE;
+                            correctPose = midIntakeEnd;
+                            correctPoseToShoot = new Path(new BezierLine(correctPose, shoot));
+                            intakeStartToEnd = new Path(new BezierLine(midIntakeStart, midIntakeEnd));
+                        }
+
+                        //If both rows have been intaked
+                        else
+                        {
+                            //Tells the robot to park at the end spot
+                            driveStates = DRIVESTATES.END;
+                        }
+                    }
+
+
+                }
+
+                //If the robot needs to drive to the location for it to start intaking the top row of balls
+                else if(driveStates == DRIVESTATES.TOP)
+                {
+                    //When the robot is not driving
+                    if(!isMoving)
+                    {
+                        //Where to move the robot
+                        follower.followPath(shootToTop);
+
+                        //Tells the robot that we are now moving
+                        isMoving = true;
+                    }
+
+                    //Once the robot is at the intaking position
+                    if(follower.atPose(topIntakeStart, 4, 4))
+                    {
+                        //Lets the robot know we stopped moving
+                        isMoving = false;
+
+                        //Tells the robot that this row of balls wont be available for intake
+                        availableBalls[0] = false;
+
+                        //Tells the robot to start intaking
+                        currentState = STATES.INTAKE;
+
+                        //Stores the order of the balls in the carousel
+                        order = "ppg";
+                    }
+                }
+
+                //If the robot needs to drive to the location for it to start intaking the mid row of balls
+                else if(driveStates == DRIVESTATES.MIDDLE)
+                {
+                    //When the robot is not driving
+                    if(!isMoving)
+                    {
+                        //Where to move the robot
+                        follower.followPath(shootToMid);
+
+                        //Tells the robot that we are now moving
+                        isMoving = true;
+                    }
+
+                    //Once the robot is at the intaking position
+                    if(follower.atPose(midIntakeStart, 4, 4))
+                    {
+                        //Lets the robot know we stopped moving
+                        isMoving = false;
+
+                        //Tells the robot that this row of balls wont be available for intake
+                        availableBalls[1] = false;
+
+                        //Tells the robot to start intaking
+                        currentState = STATES.INTAKE;
+
+                        //Stores the order of the balls in the carousel
+                        order = "pgp";
+                    }
+                }
+
+                //If the robot needs to drive to the location to park
+                else if(driveStates == DRIVESTATES.END)
+                {
+                    //When the robot is not driving
+                    if(!isMoving)
+                    {
+                        //Where to move the robot
+                        follower.followPath(shootToEnd);
+
+                        //Tells the robot that we are now moving
+                        isMoving = true;
+                    }
+
+                    //Once the robot is at the end position
+                    if(follower.atPose(endPos, 4, 4))
+                    {
+                        //Lets the robot know we stopped moving
+                        isMoving = false;
+
+                        //Tells the robot that it is done doing things
+                        currentState = STATES.DONE;
+                    }
+                }
+            break;
 
 
             //Turns the robot to shoot three balls, insures the ramp is up, sets the gate to
@@ -366,8 +438,25 @@ public class BaseStartBlue9Ball extends OpMode
                 //If we want to shoot and we currently are not shooting
                 if (!isShooting)
                 {
-                    //Put the ramp up
-                    rampUp();
+                    //Puts the ramp up
+                    if(!isRampMoving)
+                    {
+                        isRampMoving = true;
+                    }
+
+                    ramp.setPower(0.5);
+
+                    if(!touchSensorTop.getState())
+                    {
+                        ramp.setPower(0);
+                        isRampMoving = false;
+                        rampPos = "up";
+                    }
+                    else
+                    {
+                        break;
+                    }
+
 
                     //Restart the timer
                     shootTime.resetTimer();
@@ -407,8 +496,24 @@ public class BaseStartBlue9Ball extends OpMode
                 //When the robot has not started intaking
                 if (!isIntaking)
                 {
-                    //Puts the ramp up
-                    rampDown();
+                    //Puts the ramp down
+                    if(!isRampMoving)
+                    {
+                        isRampMoving = true;
+                    }
+
+                    ramp.setPower(-0.5);
+
+                    if(!touchSensorBot.getState())
+                    {
+                        ramp.setPower(0);
+                        isRampMoving = false;
+                        rampPos = "up";
+                    }
+                    else
+                    {
+                        break;
+                    }
 
                     //Turns on the intake
                     intake.setPower(1);
@@ -417,11 +522,11 @@ public class BaseStartBlue9Ball extends OpMode
                     isIntaking = true;
 
                     //Makes the robot go from its current position to the ending spot it needs to
-                    follower.followPath(new Path(new BezierLine(follower.getPose(), correctPose)));
+                    follower.followPath(intakeStartToEnd);
                 }
 
                 //If the robot is intaking and has reached its final destination
-                else if (isIntaking && follower.atPose(correctPose, 4, 4))
+                else if (follower.atPose(correctPose, 4, 4))
                 {
                     //turn off intake
                     intake.setPower(0);
@@ -445,20 +550,8 @@ public class BaseStartBlue9Ball extends OpMode
                     //If the color sensor sees a ball
                     if (isBall())
                     {
-                        //Starts to spin the carousel
-                        carousel.setPower(0.25);
-
-                        //Starts a time which is basically used as a sleep
-                        spindexTime.resetTimer();
-
-                        //A empty while loop so it just wait until a second goes by
-                        while (spindexTime.getElapsedTimeSeconds() < 1)
-                        {
-
-                        }
-
-                        //Stops moving the carousel
-                        carousel.setPower(0);
+                        //Tells the robot to rotate the carousel by one section
+                        rotateOneSection();
                     }
                 }
 
@@ -539,32 +632,16 @@ public class BaseStartBlue9Ball extends OpMode
     public void orderBalls(String motif, String order)
     {
         //Moves the gate to the front area of the carousel, the values are absolute
-        gate.setPosition(0.67);
+        gateOpen();
 
         telemetry.addData("Motif: ", motif);
         telemetry.addData("Order: ", order);
         telemetry.update();
 
-
-        carousel.setPower(0);
-        spindexTime.resetTimer();
-        while(spindexTime.getElapsedTimeSeconds() < 0.5)
-        {
-
-        }
-
         while(!motif.equals(order))
         {
-            //Spins the carousel to the next section
-            carousel.setPower(0.25);
-            spindexTime.resetTimer();
-            while(spindexTime.getElapsedTimeSeconds() < 1)
-            {
-
-            }
-
-            //Stops the carousel from spinning
-            carousel.setPower(0);
+            //Tells the robot to rotate the carousel by one section
+            rotateOneSection();
 
             //Move the last item in the string to the front
             order = order.substring(2) + order.substring(0,2);
@@ -574,40 +651,7 @@ public class BaseStartBlue9Ball extends OpMode
         telemetry.addData("Order: ", order);
         telemetry.update();
 
-        gate.setPosition(0.95);
-    }
-
-
-    //A method to put the ramp up
-    public void rampUp()
-    {
-        //While the sensor on the top is not getting clicked
-        while(!touchSensorTop.getState())
-        {
-            //Set the ramp to go up, and the intake to go inwards
-            ramp.setPower(0.5);
-            intake.setPower(1);
-        }
-        //Turn the ramp and the intake off
-        ramp.setPower(0);
-        intake.setPower(0);
-        rampPos = "up";
-    }
-
-    //A method to put the ramp down
-    public void rampDown()
-    {
-        //While the sensor on the top is not getting clicked
-        while(touchSensorBot.getState())
-        {
-            //Set the ramp to go down, and the intake to go outwards
-            ramp.setPower(-0.5);
-            intake.setPower(-1);
-        }
-        //Turn the ramp and the intake off
-        ramp.setPower(0.0);
-        intake.setPower(0.0);
-        rampPos = "down";
+        gateClose();
     }
 
     //Opens the gate to be able to spindex
@@ -649,7 +693,8 @@ public class BaseStartBlue9Ball extends OpMode
         if (OrderBalls != null && OrderBalls.isAlive()) return;
 
         sortingDone = false;
-        OrderBalls = new Thread(() -> {
+        OrderBalls = new Thread(() ->
+        {
             orderBalls(motif, order);
             sortingDone = true;
         });
