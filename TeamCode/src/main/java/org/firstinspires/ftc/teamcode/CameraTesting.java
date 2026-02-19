@@ -85,7 +85,10 @@ public class CameraTesting extends LinearOpMode
         if(opModeIsActive())
         {
             motif = getMotif();
-            orderBalls(motif,"ppg");
+            if(!motif.isEmpty())
+            {
+                orderBalls(motif, "ppg");
+            }
             telemetry.update();
         }
     }
