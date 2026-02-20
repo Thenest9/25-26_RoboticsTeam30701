@@ -34,7 +34,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 */
 
-@Autonomous(name = "Wall Start Blue 6 Ball")
+@Autonomous(name = "Base Start Blue 9 Ball")
 public class WallStartBlue6Ball extends OpMode {
     //------------------------DEFINING VARIABLES------------------------//
 
@@ -118,11 +118,7 @@ public class WallStartBlue6Ball extends OpMode {
 
     private final Pose topIntakeEnd = new Pose(16, 82, Math.toRadians(180));
 
-    private final Pose midIntakeStart = new Pose(42, 58, Math.toRadians(180));
-
-    private final Pose midIntakeEnd = new Pose(16, 58, Math.toRadians(180));
-
-    private final Pose endPos = new Pose(19, 70, Math.toRadians(0));
+    private final Pose endPos = new Pose(62, 35, Math.toRadians(90));
 
     //A thread which handles the parallel computing part of sorting balls
     private Thread OrderBalls;
@@ -148,8 +144,6 @@ public class WallStartBlue6Ball extends OpMode {
     private Path intakeStartToEnd;
 
     private final Path shootToTop = new Path(new BezierLine(shoot, topIntakeStart));
-
-    private final Path shootToMid = new Path(new BezierLine(shoot, midIntakeStart));
 
     private final Path shootToEnd = new Path(new BezierLine(shoot, endPos));
     ;
@@ -268,8 +262,19 @@ public class WallStartBlue6Ball extends OpMode {
                         //Lets the robot know we stopped moving
                         isMoving = false;
 
+                        //Gets the value of the motif
+                        motif = getMotif();
+
+                        if(motif.isEmpty())
+                        {
+                            currentState = STATES.DONE;
+                        }
+
                         //Lets the robot know to start shooting
                         driveStates = DRIVESTATES.SHOOT;
+
+                        //Starts the shooting thread on the robot
+                        startSorting();
                     }
                 }
 
@@ -336,33 +341,6 @@ public class WallStartBlue6Ball extends OpMode {
 
                         //Stores the order of the balls in the carousel
                         order = "ppg";
-                    }
-                }
-
-                //If the robot needs to drive to the location for it to start intaking the mid row of balls
-                else if (driveStates == DRIVESTATES.MIDDLE) {
-                    //When the robot is not driving
-                    if (!isMoving) {
-                        //Where to move the robot
-                        follower.followPath(shootToMid);
-
-                        //Tells the robot that we are now moving
-                        isMoving = true;
-                    }
-
-                    //Once the robot is at the intaking position
-                    if (follower.atPose(midIntakeStart, 4, 4)) {
-                        //Lets the robot know we stopped moving
-                        isMoving = false;
-
-                        //Tells the robot that this row of balls wont be available for intake
-                        availableBalls[1] = false;
-
-                        //Tells the robot to start intaking
-                        currentState = STATES.INTAKE;
-
-                        //Stores the order of the balls in the carousel
-                        order = "pgp";
                     }
                 }
 
@@ -473,6 +451,9 @@ public class WallStartBlue6Ball extends OpMode {
 
                     //Set the driving state to shoot
                     driveStates = DRIVESTATES.SHOOT;
+
+                    //Opens a thread which sorts the balls in the robot according to the motif
+                    startSorting();
                 }
 
                 //If a ball is present, then it turns the carousel for one rotation
@@ -602,6 +583,18 @@ public class WallStartBlue6Ball extends OpMode {
             //Lets the main program know that a ball was not seen
             return false;
         }
+    }
+
+    public void startSorting() {
+        if (OrderBalls != null && OrderBalls.isAlive()) return;
+
+        sortingDone = false;
+        OrderBalls = new Thread(() ->
+        {
+            orderBalls(motif, order);
+            sortingDone = true;
+        });
+        OrderBalls.start();
     }
 
     public void keepRampStill() {
