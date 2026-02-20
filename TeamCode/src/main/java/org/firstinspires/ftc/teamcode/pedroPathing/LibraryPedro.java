@@ -63,7 +63,7 @@ public class LibraryPedro
     public boolean isShooting;
     public boolean isIntaking=false;
     public boolean isCarMoving;
-    public boolean isDoneSpindexing;
+    public boolean isOrdering;
 
     private Timer intakeTimer;
     private Timer shootTimer;
@@ -147,7 +147,7 @@ public class LibraryPedro
         carTimer.resetTimer();
         while(magneticLimitSwitch.getState())
         {
-            carousel.setPower(0.2);
+            carousel.setPower(0.4);
             isCarMoving = true;
         }
             carTimer.resetTimer();
@@ -215,17 +215,7 @@ public class LibraryPedro
     }
     public boolean isBall()
     {
-        boolean ballPresent = colorSensor.red()>=40;
-        if(ballPresent && !wasBallPresent)
-        {
-            //check if there is a ball. if there is spin for an amount of time to nexct position
-            //carouselStart();
-            ball++;
-            wasBallPresent = true;
-            return true;// if not do nothing, needs to stop at 3rd ball
-        }
-        wasBallPresent = ballPresent;
-        return false;
+        return (colorSensor.red()>=40);
     }
 
     public String getMotif()
@@ -249,14 +239,11 @@ public class LibraryPedro
                 motif = "ppg";
 //                telemetry.addData("Color:", "Purple, Purple, Green");
             }
-
             else if(detectedTagId == 22)
             {
                 motif = "pgp";
 //                telemetry.addData("Color:", "Purple, Green, Purple");
             }
-
-
             else if(detectedTagId == 21)
             {
                 motif = "gpp";
@@ -327,29 +314,30 @@ public class LibraryPedro
     }
     public void orderBalls(String motif, String order)
     {
-//        isDoneIntaking=true;
         //Moves the gate to the front area of the carousel, the values are absolute
         gate.setPosition(0.67);
 
         telemetry.addData("Motif: ", motif);
         telemetry.addData("Order: ", order);
         telemetry.update();
+
         while(!motif.equals(order))
         {
-            //isDoneSpindexing=false;
+            isOrdering=true;
+//            isOrdering=false;
             //Spins the carousel to the next section
+
             while(!magneticLimitSwitch.getState())
             {
                 carousel.setPower(0.2);
             }
             carousel.setPower(0);
-            while(magneticLimitSwitch.getState())
-            {
+            while (magneticLimitSwitch.getState()) {
                 carousel.setPower(0.3);
             }
             //Stops the carousel from spinning
             carousel.setPower(0);
-            //Move the last item in the string to the front
+
             order = order.substring(2) + order.substring(0, 2);
         }
         telemetry.addData("Motif: ", motif);
@@ -357,48 +345,13 @@ public class LibraryPedro
         telemetry.update();
 
         gate.setPosition(0.95);
-        //isDoneSpindexing=true;
+        isOrdering=false;
+
     }
-//
-//    private boolean orderPossible(String order)
-//    {
-//        if(order.contains("g") && order.contains("p") && order.substring(order.indexOf("p") + 1).contains("p"))
-//        {
-//            return true;
-//        }
-//        //if it doesn't have 2 purples and one green, it returns false
-//        return false;
-//    }
-////
-//    //Spins through the carousel and gets the values of the order of the balls
-//    public String getOrder()
-//    {
-//        String order = "";
-//        for(int i = 0; i < 3; i++)
-//        {
-//            //Spins the carousel to the next section
-//            carousel.setPower(0.25);
-//            opMode.sleep(1000);
-//
-//            //Spins the carousel up a little bit
-//            carousel.setPower(-0.2);
-//            opMode.sleep(220);
-//
-//            //Stops the carousel from spinning
-//            carousel.setPower(0);
-//            opMode.sleep(280);
-//
-//            //Adds the current ball to the string already made
-//            order = checkRGB() + order;
-//
-//            //Telemetry for us knowing the details of each ball
-//            telemetry.addData("CS Red: ", colorSensor.red());
-//            telemetry.addData("CS Green: ", colorSensor.green());
-//            telemetry.addData("CS Blue: ", colorSensor.blue());
-//            telemetry.addData("Current Order: ", order);
-//            telemetry.update();
-//        }
-//
-//        //Returns the string filled with the correct order
-//        return order;
+
+    public boolean getIsOrdering()
+    {
+        return isOrdering;
+    }
+
 }

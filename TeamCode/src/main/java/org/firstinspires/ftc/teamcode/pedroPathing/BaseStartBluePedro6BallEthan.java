@@ -186,7 +186,7 @@ public class BaseStartBluePedro6BallEthan extends OpMode
 
                 break;
             case 5:
-                if(!follower.isBusy() && lib.isDoneSpindexing)
+                if(!follower.isBusy() && lib.isOrdering)
                 {
                     lib.shootThree(1300);
                     setPathState(6);
