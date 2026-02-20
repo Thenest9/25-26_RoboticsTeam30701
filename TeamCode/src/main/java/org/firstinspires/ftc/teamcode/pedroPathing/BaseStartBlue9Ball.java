@@ -60,9 +60,11 @@ public class BaseStartBlue9Ball extends OpMode {
     //Making the gate to have the gate open or closed depending on intake or output
     private Servo gate;
 
+    //Making a variable for the magnetic limit switch
+    private DigitalChannel magneticSwitch;
+
     //Used in pedropathing to move the robot along a certain path
     private Follower follower;
-
 
     //The value of the motif
     private String motif;
@@ -134,6 +136,8 @@ public class BaseStartBlue9Ball extends OpMode {
     private String rampPos = "up";
 
     private boolean isRampMoving = false;
+
+    private boolean isCarouselOn = false;
 
 
     //Paths the robot is gonna follow
@@ -216,6 +220,10 @@ public class BaseStartBlue9Ball extends OpMode {
         //Creating the follower object so the robot knows to follow certain paths
         follower = Constants.createFollower((hardwareMap));
         follower.setStartingPose(start);
+
+        //Initializing the magnetic limit switch for more precise carousel movements
+        magneticSwitch = hardwareMap.get(DigitalChannel.class, "magSwitch");
+        magneticSwitch.setMode(DigitalChannel.Mode.INPUT);
     }
     //------------------------FINISH DECLARING HARDWARE------------------------//
 
@@ -675,7 +683,18 @@ public class BaseStartBlue9Ball extends OpMode {
 
     public void rotateOneSection()
     {
+        if (!isCarouselOn)
+        {
+            isCarouselOn = true;
+        }
 
+        carousel.setPower(0.3);
+
+        if (!magneticSwitch.getState())
+        {
+            carousel.setPower(0);
+            isCarouselOn = false;
+        }
     }
 
     //------------------------FINISH DECLARING METHODS------------------------//
