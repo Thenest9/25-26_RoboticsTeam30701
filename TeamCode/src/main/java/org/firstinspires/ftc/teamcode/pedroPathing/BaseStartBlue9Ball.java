@@ -35,8 +35,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 */
 
 @Autonomous(name = "Base Start Blue 9 Ball")
-public class BaseStartBlue9Ball extends OpMode
-{
+public class BaseStartBlue9Ball extends OpMode {
     //------------------------DEFINING VARIABLES------------------------//
 
     //The camera at the top of the robot used to see the april tags
@@ -117,11 +116,11 @@ public class BaseStartBlue9Ball extends OpMode
 
     private final Pose topIntakeEnd = new Pose(16, 82, Math.toRadians(180));
 
-    private final Pose midIntakeStart = new Pose(42,58,Math.toRadians(180));
+    private final Pose midIntakeStart = new Pose(42, 58, Math.toRadians(180));
 
-    private final Pose midIntakeEnd = new Pose(16,58,Math.toRadians(180));
+    private final Pose midIntakeEnd = new Pose(16, 58, Math.toRadians(180));
 
-    private final Pose endPos = new Pose(19,70,Math.toRadians(0));
+    private final Pose endPos = new Pose(19, 70, Math.toRadians(0));
 
     //A thread which handles the parallel computing part of sorting balls
     private Thread OrderBalls;
@@ -148,8 +147,8 @@ public class BaseStartBlue9Ball extends OpMode
 
     private final Path shootToMid = new Path(new BezierLine(shoot, midIntakeStart));
 
-    private final Path shootToEnd = new Path(new BezierLine(shoot, endPos));;
-
+    private final Path shootToEnd = new Path(new BezierLine(shoot, endPos));
+    ;
 
 
     //------------------------FINISH DEFINING VARIABLES------------------------//
@@ -167,12 +166,8 @@ public class BaseStartBlue9Ball extends OpMode
     */
 
 
-
-
-
     //------------------------DECLARING HARDWARE------------------------//
-    public void init()
-    {
+    public void init() {
         //Tuning for the flywheels so they can get to speed faster
         final double shooterP = 48.72995;
         final double shooterI = 0;
@@ -238,28 +233,21 @@ public class BaseStartBlue9Ball extends OpMode
     */
 
 
-
-
-
     //------------------------RUNNING CODE-----------------------//
-    public void loop()
-    {
+    public void loop() {
         //Updates the pedropathing so even if you move it, it always stays on the position it needs to be
         follower.update();
 
         keepRampStill();
 
         //Switches to the case currentState is on
-        switch (currentState)
-        {
+        switch (currentState) {
             //Drives the robot to the next position it needs to go
             case DRIVE:
                 //If the robot needs to drive to the location of the motif
-                if(driveStates == DRIVESTATES.MOTIF)
-                {
+                if (driveStates == DRIVESTATES.MOTIF) {
                     //When the robot is not driving
-                    if(!isMoving)
-                    {
+                    if (!isMoving) {
                         //Moving the robot to face the motif
                         follower.followPath(startToMotif);
 
@@ -268,8 +256,7 @@ public class BaseStartBlue9Ball extends OpMode
                     }
 
                     //Once it is facing the motif, then it gets the motif and looks at the goal
-                    else if (follower.atPose(motifPos, 4, 4))
-                    {
+                    else if (follower.atPose(motifPos, 4, 4)) {
                         //Lets the robot know we stopped moving
                         isMoving = false;
 
@@ -285,11 +272,9 @@ public class BaseStartBlue9Ball extends OpMode
                 }
 
                 //If the robot needs to drive to the location for it to shoot
-                else if(driveStates == DRIVESTATES.SHOOT)
-                {
+                else if (driveStates == DRIVESTATES.SHOOT) {
                     //When the robot is not driving
-                    if(!isMoving)
-                    {
+                    if (!isMoving) {
                         //Where to move the robot
                         follower.followPath(correctPoseToShoot);
 
@@ -298,8 +283,7 @@ public class BaseStartBlue9Ball extends OpMode
                     }
 
                     //If the robot is at the shooting position
-                    else if (follower.atPose(shoot, 4, 4))
-                    {
+                    else if (follower.atPose(shoot, 4, 4)) {
                         //Lets the robot know we stopped moving
                         isMoving = false;
 
@@ -307,8 +291,7 @@ public class BaseStartBlue9Ball extends OpMode
                         currentState = STATES.SHOOT;
 
                         //If the balls at the top have not been intaked
-                        if(availableBalls[0])
-                        {
+                        if (availableBalls[0]) {
                             //Tells the robot to drive to the top intake and set the correct
                             //position to the end of the intakes
                             driveStates = DRIVESTATES.TOP;
@@ -318,8 +301,7 @@ public class BaseStartBlue9Ball extends OpMode
                         }
 
                         //If the balls at the mid have not been intaked
-                        else if(availableBalls[1])
-                        {
+                        else if (availableBalls[1]) {
                             //Tells the robot to drive to the mid intake and set the correct
                             //position to the end of the intakes
                             driveStates = DRIVESTATES.MIDDLE;
@@ -329,8 +311,7 @@ public class BaseStartBlue9Ball extends OpMode
                         }
 
                         //If both rows have been intaked
-                        else
-                        {
+                        else {
                             //Tells the robot to park at the end spot
                             driveStates = DRIVESTATES.END;
                         }
@@ -340,11 +321,9 @@ public class BaseStartBlue9Ball extends OpMode
                 }
 
                 //If the robot needs to drive to the location for it to start intaking the top row of balls
-                else if(driveStates == DRIVESTATES.TOP)
-                {
+                else if (driveStates == DRIVESTATES.TOP) {
                     //When the robot is not driving
-                    if(!isMoving)
-                    {
+                    if (!isMoving) {
                         //Where to move the robot
                         follower.followPath(shootToTop);
 
@@ -353,8 +332,7 @@ public class BaseStartBlue9Ball extends OpMode
                     }
 
                     //Once the robot is at the intaking position
-                    if(follower.atPose(topIntakeStart, 4, 4))
-                    {
+                    if (follower.atPose(topIntakeStart, 4, 4)) {
                         //Lets the robot know we stopped moving
                         isMoving = false;
 
@@ -370,11 +348,9 @@ public class BaseStartBlue9Ball extends OpMode
                 }
 
                 //If the robot needs to drive to the location for it to start intaking the mid row of balls
-                else if(driveStates == DRIVESTATES.MIDDLE)
-                {
+                else if (driveStates == DRIVESTATES.MIDDLE) {
                     //When the robot is not driving
-                    if(!isMoving)
-                    {
+                    if (!isMoving) {
                         //Where to move the robot
                         follower.followPath(shootToMid);
 
@@ -383,8 +359,7 @@ public class BaseStartBlue9Ball extends OpMode
                     }
 
                     //Once the robot is at the intaking position
-                    if(follower.atPose(midIntakeStart, 4, 4))
-                    {
+                    if (follower.atPose(midIntakeStart, 4, 4)) {
                         //Lets the robot know we stopped moving
                         isMoving = false;
 
@@ -400,11 +375,9 @@ public class BaseStartBlue9Ball extends OpMode
                 }
 
                 //If the robot needs to drive to the location to park
-                else if(driveStates == DRIVESTATES.END)
-                {
+                else if (driveStates == DRIVESTATES.END) {
                     //When the robot is not driving
-                    if(!isMoving)
-                    {
+                    if (!isMoving) {
                         //Where to move the robot
                         follower.followPath(shootToEnd);
 
@@ -413,8 +386,7 @@ public class BaseStartBlue9Ball extends OpMode
                     }
 
                     //Once the robot is at the end position
-                    if(follower.atPose(endPos, 4, 4))
-                    {
+                    if (follower.atPose(endPos, 4, 4)) {
                         //Lets the robot know we stopped moving
                         isMoving = false;
 
@@ -422,7 +394,7 @@ public class BaseStartBlue9Ball extends OpMode
                         currentState = STATES.DONE;
                     }
                 }
-            break;
+                break;
 
 
             //Turns the robot to shoot three balls, insures the ramp is up, sets the gate to
@@ -430,46 +402,30 @@ public class BaseStartBlue9Ball extends OpMode
             case SHOOT:
 
                 //If the sorting isn't done,
-                if(!sortingDone)
-                {
+                if (!sortingDone) {
                     break;
                 }
 
                 //If we want to shoot and we currently are not shooting
-                if (!isShooting)
-                {
+                if (!isShooting) {
                     //Puts the ramp up
+                    rampUp();
+
                     if(!isRampMoving)
                     {
-                        isRampMoving = true;
+                        //Restart the timer
+                        shootTime.resetTimer();
+
+                        //Start the flywheels
+                        outputLeft.setVelocity(1367);
+                        outputRight.setVelocity(1367);
+
+                        //Start spinning the carousel
+                        carousel.setPower(-1);
+
+                        //Tell the code that we are currently shooting
+                        isShooting = true;
                     }
-
-                    ramp.setPower(0.5);
-
-                    if(!touchSensorTop.getState())
-                    {
-                        ramp.setPower(0);
-                        isRampMoving = false;
-                        rampPos = "up";
-                    }
-                    else
-                    {
-                        break;
-                    }
-
-
-                    //Restart the timer
-                    shootTime.resetTimer();
-
-                    //Start the flywheels
-                    outputLeft.setVelocity(1367);
-                    outputRight.setVelocity(1367);
-
-                    //Start spinning the carousel
-                    carousel.setPower(-1);
-
-                    //Tell the code that we are currently shooting
-                    isShooting = true;
                 }
 
                 //Once all balls have been shot
@@ -497,37 +453,23 @@ public class BaseStartBlue9Ball extends OpMode
                 if (!isIntaking)
                 {
                     //Puts the ramp down
+                    rampDown();
+
                     if(!isRampMoving)
                     {
-                        isRampMoving = true;
+                        //Turns on the intake
+                        intake.setPower(1);
+
+                        //Lets the code know that intake has been started
+                        isIntaking = true;
+
+                        //Makes the robot go from its current position to the ending spot it needs to
+                        follower.followPath(intakeStartToEnd);
                     }
-
-                    ramp.setPower(-0.5);
-
-                    if(!touchSensorBot.getState())
-                    {
-                        ramp.setPower(0);
-                        isRampMoving = false;
-                        rampPos = "up";
-                    }
-                    else
-                    {
-                        break;
-                    }
-
-                    //Turns on the intake
-                    intake.setPower(1);
-
-                    //Lets the code know that intake has been started
-                    isIntaking = true;
-
-                    //Makes the robot go from its current position to the ending spot it needs to
-                    follower.followPath(intakeStartToEnd);
                 }
 
                 //If the robot is intaking and has reached its final destination
-                else if (follower.atPose(correctPose, 4, 4))
-                {
+                else if (follower.atPose(correctPose, 4, 4)) {
                     //turn off intake
                     intake.setPower(0);
 
@@ -545,11 +487,9 @@ public class BaseStartBlue9Ball extends OpMode
                 }
 
                 //If a ball is present, then it turns the carousel for one rotation
-                else
-                {
+                else {
                     //If the color sensor sees a ball
-                    if (isBall())
-                    {
+                    if (isBall()) {
                         //Tells the robot to rotate the carousel by one section
                         rotateOneSection();
                     }
@@ -579,13 +519,11 @@ public class BaseStartBlue9Ball extends OpMode
     */
 
 
-
     //------------------------DECLARING METHODS------------------------//
 
 
     //Gets the value of the Motif and returns it to the call
-    public String getMotif()
-    {
+    public String getMotif() {
         //Makes the String object which will be returned at the end
         String motif = "";
 
@@ -594,30 +532,26 @@ public class BaseStartBlue9Ball extends OpMode
         LLResult result = limelight.getLatestResult();
 
         //If the motif sees something and it isnt empty
-        if (result.isValid() && !result.getFiducialResults().isEmpty())
-        {
+        if (result.isValid() && !result.getFiducialResults().isEmpty()) {
             //Gets what ID number is displayed on the April Tag (23, 22, or 21)
             LLResultTypes.FiducialResult fiducial = result.getFiducialResults().get(0);
             int detectedTagId = fiducial.getFiducialId();
             telemetry.addData("AprilTag ID", detectedTagId);
 
             //If the tag the limelight sees is 23, the code is PPG
-            if (detectedTagId == 23)
-            {
+            if (detectedTagId == 23) {
                 motif = "ppg";
                 telemetry.addData("Color:", "Purple, Purple, Green");
             }
 
             //If the tag the limelight sees is 22, the code is PGP
-            else if(detectedTagId == 22)
-            {
+            else if (detectedTagId == 22) {
                 motif = "pgp";
                 telemetry.addData("Color:", "Purple, Green, Purple");
             }
 
             //If the tag the limelight sees is 21, the code is GPP
-            else if(detectedTagId == 21)
-            {
+            else if (detectedTagId == 21) {
                 motif = "gpp";
                 telemetry.addData("Color:", "Green, Purple, Purple");
             }
@@ -629,8 +563,7 @@ public class BaseStartBlue9Ball extends OpMode
 
 
     //Orders the balls depending on the order passed through and the value of the Motif
-    public void orderBalls(String motif, String order)
-    {
+    public void orderBalls(String motif, String order) {
         //Moves the gate to the front area of the carousel, the values are absolute
         gateOpen();
 
@@ -638,13 +571,12 @@ public class BaseStartBlue9Ball extends OpMode
         telemetry.addData("Order: ", order);
         telemetry.update();
 
-        while(!motif.equals(order))
-        {
+        while (!motif.equals(order)) {
             //Tells the robot to rotate the carousel by one section
             rotateOneSection();
 
             //Move the last item in the string to the front
-            order = order.substring(2) + order.substring(0,2);
+            order = order.substring(2) + order.substring(0, 2);
         }
 
         telemetry.addData("Motif: ", motif);
@@ -655,24 +587,20 @@ public class BaseStartBlue9Ball extends OpMode
     }
 
     //Opens the gate to be able to spindex
-    public void gateOpen()
-    {
+    public void gateOpen() {
         gate.setPosition(0.67);
     }
 
     //Closes the gate to be able to shoot
-    public void gateClose()
-    {
+    public void gateClose() {
         gate.setPosition(0.95);
     }
 
 
     //Checks if there is a ball in front of the carousel
-    public boolean isBall()
-    {
+    public boolean isBall() {
         //If a ball is there and the count is less than 2
-        if(colorSensor.red()>40 && balls < 2)
-        {
+        if (colorSensor.red() > 40 && balls < 2) {
             //Increase the balls count by 1
             balls++;
 
@@ -681,15 +609,13 @@ public class BaseStartBlue9Ball extends OpMode
         }
 
         //If no ball is seen in front of the carousel
-        else
-        {
+        else {
             //Lets the main program know that a ball was not seen
             return false;
         }
     }
 
-    public void startSorting()
-    {
+    public void startSorting() {
         if (OrderBalls != null && OrderBalls.isAlive()) return;
 
         sortingDone = false;
@@ -701,18 +627,56 @@ public class BaseStartBlue9Ball extends OpMode
         OrderBalls.start();
     }
 
-    public void keepRampStill()
-    {
-        if(rampPos.equals("up"))
+    public void keepRampStill() {
+        if (rampPos.equals("up"))
         {
             ramp.setPower(0.05);
         }
+
         else
         {
             ramp.setPower(-0.05);
         }
     }
 
+    public void rampUp()
+    {
+        if (!isRampMoving)
+        {
+            isRampMoving = true;
+        }
+
+        ramp.setPower(0.5);
+
+        if (!touchSensorTop.getState())
+        {
+            ramp.setPower(0);
+            isRampMoving = false;
+            rampPos = "up";
+        }
+    }
+
+    public void rampDown()
+    {
+        if (!isRampMoving)
+        {
+            isRampMoving = true;
+        }
+
+        ramp.setPower(-0.5);
+
+        if (!touchSensorBot.getState())
+        {
+            ramp.setPower(0);
+            isRampMoving = false;
+            rampPos = "down";
+        }
+    }
+
+    public void rotateOneSection()
+    {
+
+    }
 
     //------------------------FINISH DECLARING METHODS------------------------//
 }
