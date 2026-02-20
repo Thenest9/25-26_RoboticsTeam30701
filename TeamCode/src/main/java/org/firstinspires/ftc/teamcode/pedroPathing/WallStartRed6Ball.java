@@ -34,7 +34,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 */
 
-@Autonomous(name = "Wall Start Blue 6 Ball")
+@Autonomous(name = "Base Start Blue 9 Ball")
 public class WallStartRed6Ball extends OpMode {
     //------------------------DEFINING VARIABLES------------------------//
 
@@ -119,6 +119,9 @@ public class WallStartRed6Ball extends OpMode {
     private final Pose topIntakeEnd = new Pose(127, 86, Math.toRadians(0));
 
     private final Pose endPos = new Pose(84, 34, Math.toRadians(90));
+
+    //A thread which handles the parallel computing part of sorting balls
+    private Thread OrderBalls;
 
     //Lets the robot know if the sorting is done yet or not
     private boolean sortingDone = false;
@@ -259,8 +262,19 @@ public class WallStartRed6Ball extends OpMode {
                         //Lets the robot know we stopped moving
                         isMoving = false;
 
+                        //Gets the value of the motif
+                        motif = getMotif();
+
+                        if(motif.isEmpty())
+                        {
+                            currentState = STATES.DONE;
+                        }
+
                         //Lets the robot know to start shooting
                         driveStates = DRIVESTATES.SHOOT;
+
+                        //Starts the shooting thread on the robot
+                        startSorting();
                     }
                 }
 
@@ -437,6 +451,9 @@ public class WallStartRed6Ball extends OpMode {
 
                     //Set the driving state to shoot
                     driveStates = DRIVESTATES.SHOOT;
+
+                    //Opens a thread which sorts the balls in the robot according to the motif
+                    startSorting();
                 }
 
                 //If a ball is present, then it turns the carousel for one rotation
@@ -566,6 +583,18 @@ public class WallStartRed6Ball extends OpMode {
             //Lets the main program know that a ball was not seen
             return false;
         }
+    }
+
+    public void startSorting() {
+        if (OrderBalls != null && OrderBalls.isAlive()) return;
+
+        sortingDone = false;
+        OrderBalls = new Thread(() ->
+        {
+            orderBalls(motif, order);
+            sortingDone = true;
+        });
+        OrderBalls.start();
     }
 
     public void keepRampStill() {
