@@ -233,7 +233,7 @@ public class BaseStartRed9Ball extends OpMode
                 setPathState(1);
                 break;
             case 1:
-                if(!follower.isBusy() && pathTimer.getElapsedTimeSeconds()>1)
+                if(!follower.isBusy() && pathTimer.getElapsedTimeSeconds()>0.5)
                 {
                     //Order balls, then case 2, shoot, then case 3, stop and move one
                     lib.orderBalls(currMotif, "ppg");
@@ -270,15 +270,15 @@ public class BaseStartRed9Ball extends OpMode
                 {
                     actionTimer.resetTimer();
                     lib.rampUp();
-
+                    lib.orderBalls(currMotif, "gpp");
                     follower.followPath(secondShot, true);
+
                     setPathState(6);
                 }
                 break;
             case 6:
                 if(!follower.isBusy())
                 {
-                    lib.orderBalls(currMotif, "gpp");
                     lib.shootThree(1200);
                     setPathState(7);
                 }
@@ -302,6 +302,7 @@ public class BaseStartRed9Ball extends OpMode
             case 9:
                 if(!follower.isBusy())
                 {
+                    lib.orderBalls(currMotif, "pgp");
                     follower.followPath(thirdShot, 1, true);
                     setPathState(10);
                 }
@@ -309,7 +310,6 @@ public class BaseStartRed9Ball extends OpMode
             case 10:
                 if(!follower.isBusy())
                 {
-                    lib.orderBalls(currMotif, "gpp");
                     lib.shootThree(1200);
                 }
             break;
