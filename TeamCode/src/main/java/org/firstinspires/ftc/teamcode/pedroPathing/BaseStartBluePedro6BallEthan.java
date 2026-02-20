@@ -24,7 +24,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.Library;
 
-@Autonomous(name = "Base Start Blue 6 ball Ethans UNCHANGEd", group = "Autonomous") // Panels
+@Autonomous(name = "Base Start Blue 6 ball ETHAN") // Panels
 public class BaseStartBluePedro6BallEthan extends OpMode
 {
     Limelight3A limelight;
@@ -56,8 +56,8 @@ public class BaseStartBluePedro6BallEthan extends OpMode
     private int pathState; // Current autonomous path state (state machine)
     private int step;
     private final Pose startPose= new Pose(20.688, 122.492, Math.toRadians(145));
-    public Path motifPose;
-    public PathChain collect11, collect12, collect1SP;
+    public PathChain motifPose;
+    public PathChain collectRow1, collect12, collect1SP;
     public PathChain path9,shootingPose;
 
     public String currMotif="";
@@ -65,41 +65,30 @@ public class BaseStartBluePedro6BallEthan extends OpMode
 
     public void buildPaths()
     {
-        motifPose = new Path(new BezierLine(new Pose(20.688, 122.492), new Pose(44.795,98.385)));
-        motifPose.setLinearHeadingInterpolation(Math.toRadians(145), Math.toRadians(75));
+        motifPose = follower.pathBuilder().addPath(new BezierLine(startPose, new Pose(41.313, 101.868)))
+                .setLinearHeadingInterpolation(Math.toRadians(145), Math.toRadians(75))
 
-        shootingPose = follower.pathBuilder().addPath(
-                        new BezierLine(
-                                new Pose(44.795, 98.385),
-                                new Pose(44.695, 98.385)
-                        )
-                ).setLinearHeadingInterpolation(Math.toRadians(75), Math.toRadians(150))
+                .addPath(new BezierLine(new Pose(41.313, 101.868), new Pose(41.313, 101.868)))
+                .setLinearHeadingInterpolation(Math.toRadians(75), Math.toRadians(145))
                 .build();
 
-        collect11 = follower.pathBuilder().addPath(
-                        new BezierLine(
-                                new Pose(44.695, 98.385),
-                                new Pose(44.695, 81.364)
-                        )
-                ).setLinearHeadingInterpolation(Math.toRadians(150), Math.toRadians(180))
-                .build();
+        collectRow1 = follower.pathBuilder().addPath(new BezierCurve(new Pose(41.313, 101.868),new Pose(50.296, 93.911),new Pose(44.795, 82.364)))
+                .setLinearHeadingInterpolation(Math.toRadians(145), Math.toRadians(180))
 
-        collect12 = follower.pathBuilder().addPath(
-                        new BezierLine(
-                                new Pose(44.695, 81.364),
-                                new Pose(18.00, 81.159)
-                        )
-                ).setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(180))
-
+                .addParametricCallback(0.99, () ->{
+                    lib.IntakeStart();
+                })
+                .addPath(new BezierLine(new Pose(44.795, 82.364),new Pose(18.00, 82.364)))//moves forward to collect balls
+                .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(180))
                 .build();
 
         collect1SP = follower.pathBuilder().addPath(
                         new BezierLine(
-                                new Pose(18.000, 81.159),
+                                new Pose(18.000, 82.364),
 
-                                new Pose(44.695, 98.385)
+                                new Pose(41.313, 101.868)
                         )
-                ).setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(145))
+                ).setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(140))
 
                 .build();
 
@@ -110,7 +99,6 @@ public class BaseStartBluePedro6BallEthan extends OpMode
                                 new Pose(20.000, 72.717)
                         )
                 ).setLinearHeadingInterpolation(Math.toRadians(140), Math.toRadians(270))
-
                 .build();
     }
 
@@ -128,83 +116,76 @@ public class BaseStartBluePedro6BallEthan extends OpMode
                 motifTimer.resetTimer();
                 setPathState(1);
                 break;
-            case 1://get motif then shoot
-                switch (step)
+            case 1:
+                if(!follower.isBusy() && pathTimer.getElapsedTimeSeconds()>1.2)
                 {
-                    case 0:
-                        if(motifTimer.getElapsedTimeSeconds()>1 && currMotif.isEmpty() && !follower.isBusy())
-                        {
-                            currMotif = lib.getMotif();
-                            follower.followPath(shootingPose, true);
-                            step = 1;
-                        }
-                        break;
-                    case 1:
-                        if(!follower.isBusy())
-                        {
-                            //Order balls, then case 2, shoot, then case 3, stop and move one
-                            lib.shootThree(1280);
-                            step = 2;
-                        }
-                        break;
-                    case 2:
-                        if(!lib.isShooting)
-                        {
-                            step=0;
-                            setPathState(2);
-                        }
-                        break;
+                    //Order balls, then case 2, shoot, then case 3, stop and move one
+                    lib.orderBalls(currMotif, "ppg");
+                    setPathState(2);
                 }
                 break;
-            case 2://move to be infront of balls
+            case 2:
+                if(!lib.getIsOrdering() && pathTimer.getElapsedTimeSeconds()>0.5)
+                {
+                    lib.shootThree(1150);
+                    setPathState(3);
+                }
+                break;
+
+            case 3://move to be infront of balls
                 if(!follower.isBusy() && !lib.isShooting && pathTimer.getElapsedTimeSeconds()>3)
                 {
                     lib.rampDown();
-                    follower.followPath(collect11, true);//moves infront of row 1 to intake, sets correct angle
-                    lib.IntakeStart();//starts intake
-                    setPathState(3);//moves onto next path
-                }
-                break;
-            case 3:
-                if(!follower.isBusy() && pathTimer.getElapsedTimeSeconds()>2 )//checks if it stopped following previous path, checks if its been at leat 0.5 seconds
-                {
-                    follower.followPath(collect12, 0.8, true);
-                    setPathState(4);
+                    follower.followPath(collectRow1);//intakes row 1
+                    setPathState(4);//moves onto next path
                 }
                 break;
             case 4:
+                if(!follower.isBusy() && pathTimer.getElapsedTimeSeconds()>2 )//checks if it stopped following previous path, checks if its been at leat 0.5 seconds
+                {
+                    follower.followPath(collect12, 0.5, true);
+                    setPathState(5);
+                }
+                break;
+            case 5:
                 if(!follower.isBusy() && !lib.isIntaking && pathTimer.getElapsedTimeSeconds()>5)
                 {
                     actionTimer.resetTimer();
                     lib.rampDown();
                     lib.rampUp();
 
-                    lib.orderBalls(currMotif, "gpp");
                     follower.followPath(collect1SP, true);
                     setPathState(5);
                 }
 
                 break;
-            case 5:
-                if(!follower.isBusy() && lib.isOrdering)
-                {
-                    lib.shootThree(1300);
-                    setPathState(6);
-                }
-                break;
             case 6:
-                if(!lib.isShooting)
+                if(!follower.isBusy())
                 {
-                    follower.followPath(path9, true);
-                    setPathState(6);
+//                    lib.orderBalls(currMotif, "gpp");
+                    lib.shootThree(1200);
+                    setPathState(7);
                 }
                 break;
+//            case 4:
+//            if(!follower.isBusy() && lib.isDoneSpindexing)
+//            {
+//                lib.shootThree(1300);
+//                setPathState(6);
+//            }
+//            break;
+//            case 5:
+//                if(!lib.isShooting)
+//                {
+//                    follower.followPath(path9, true);
+//                    setPathState(6);
+//                }
+//                break;
         }
     }
     public void setPathState(int pState) {
         pathState = pState;
         pathTimer.resetTimer();
-//        step=0;
     }
 
     @Override
@@ -252,6 +233,7 @@ public class BaseStartBluePedro6BallEthan extends OpMode
 
         magSwitch = hardwareMap.get(DigitalChannel.class, "magSwitch");
         magSwitch.setMode(DigitalChannel.Mode.INPUT);
+
         // Initialize the library class through a lib object
 
         pathTimer = new Timer();
@@ -259,9 +241,6 @@ public class BaseStartBluePedro6BallEthan extends OpMode
         actionTimer =  new Timer();
         opmodeTimer.resetTimer();
         motifTimer = new Timer();
-
-
-        currMotif="";
 
         follower = Constants.createFollower((hardwareMap));
         buildPaths();
@@ -285,9 +264,9 @@ public class BaseStartBluePedro6BallEthan extends OpMode
             }
             carousel.setPower(0);
         }
-        else
+        if(currMotif.equals(""))
         {
-            carousel.setPower(0);
+            currMotif = lib.getMotif();
         }
 
         autonomousPathUpdate();
@@ -303,7 +282,7 @@ public class BaseStartBluePedro6BallEthan extends OpMode
         telemetry.addData("Carousel timer: ", lib.getCarTimer());
         telemetry.addData("isIntaking:", lib.isIntaking);
         telemetry.addData("Action Timer: ", actionTimer.getElapsedTimeSeconds());
-        telemetry.addData("Motif:", lib.getMotif());
+        telemetry.addData("GetMotif FUNCTION:", lib.getMotif());
         telemetry.addData("Motif", currMotif);
         telemetry.addData("Bottom", touchSensorBot.getState());
         telemetry.addData("Is Ball:", lib.isBall());
@@ -313,6 +292,8 @@ public class BaseStartBluePedro6BallEthan extends OpMode
         telemetry.addData("Blue: ", colorSensor.blue());
         telemetry.addData("Green: ", colorSensor.green());
         telemetry.addData("still following?", follower.isBusy());
+        telemetry.addData("Carousel Power: ", carousel.getPower());
+        telemetry.addData("IsOrdering: ", lib.getIsOrdering());
 
         telemetry.update();
     }

@@ -65,24 +65,27 @@ public class BaseStartBluePedro6Ball extends OpMode
 
     public void buildPaths()
     {
-        motifPose = follower.pathBuilder().addPath(new BezierLine(new Pose(20.688, 122.492), new Pose(44.795,98.385)))
+        motifPose = follower.pathBuilder().addPath(new BezierLine(startPose, new Pose(41.313, 101.868)))
                 .setLinearHeadingInterpolation(Math.toRadians(145), Math.toRadians(75))
-                .addPath(new BezierLine(new Pose(44.795, 98.385), new Pose(44.695, 98.385)))
-                        .setLinearHeadingInterpolation(Math.toRadians(75), Math.toRadians(155))
+
+                .addPath(new BezierLine(new Pose(41.313, 101.8685), new Pose(41.313, 101.868)))
+                        .setLinearHeadingInterpolation(Math.toRadians(75), Math.toRadians(145))
                 .build();
 
         collect11 = follower.pathBuilder().addPath(
-                        new BezierLine(
-                                new Pose(44.695, 98.385),
-                                new Pose(44.695, 82.364)
+                        new BezierCurve(
+                                new Pose(41.313, 101.868),
+                                new Pose(50.296, 93.911),
+                                new Pose(44.795, 82.364)
                         )
-                ).setLinearHeadingInterpolation(Math.toRadians(155), Math.toRadians(180))
+                ).setLinearHeadingInterpolation(Math.toRadians(145), Math.toRadians(180))
+
                 .build();
 
         collect12 = follower.pathBuilder().addPath(
                         new BezierLine(
-                                new Pose(44.695, 81.364),
-                                new Pose(18.00, 81.159)
+                                new Pose(44.795, 82.364),
+                                new Pose(18.00, 82.364)
                         )
                 ).setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(180))
 
@@ -90,11 +93,11 @@ public class BaseStartBluePedro6Ball extends OpMode
 
         collect1SP = follower.pathBuilder().addPath(
                         new BezierLine(
-                                new Pose(18.000, 81.159),
+                                new Pose(18.000, 82.364),
 
-                                new Pose(44.695, 98.385)
+                                new Pose(41.313, 101.868)
                         )
-                ).setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(145))
+                ).setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(140))
 
                 .build();
 
@@ -124,7 +127,7 @@ public class BaseStartBluePedro6Ball extends OpMode
                 setPathState(1);
                 break;
             case 1:
-                if(!follower.isBusy() && pathTimer.getElapsedTimeSeconds()>1)
+                if(!follower.isBusy() && pathTimer.getElapsedTimeSeconds()>1.2)
                 {
                     //Order balls, then case 2, shoot, then case 3, stop and move one
                     lib.orderBalls(currMotif, "ppg");
@@ -134,7 +137,7 @@ public class BaseStartBluePedro6Ball extends OpMode
             case 2:
                 if(!lib.getIsOrdering() && pathTimer.getElapsedTimeSeconds()>0.5)
                 {
-                    lib.shootThree(1200);
+                    lib.shootThree(1150);
                     setPathState(3);
                 }
                 break;

@@ -147,7 +147,7 @@ public class LibraryPedro
         carTimer.resetTimer();
         while(magneticLimitSwitch.getState())
         {
-            carousel.setPower(0.4);
+            carousel.setPower(0.6);
             isCarMoving = true;
         }
             carTimer.resetTimer();
