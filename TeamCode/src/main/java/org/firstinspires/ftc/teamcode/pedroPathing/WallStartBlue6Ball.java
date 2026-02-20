@@ -108,7 +108,7 @@ public class WallStartBlue6Ball extends OpMode {
 
 
     //All the way points the robot is going to go, each name tells its own one
-    private final Pose start = new Pose(20, 122, Math.toRadians(144));
+    private final Pose start = new Pose(62, 10, Math.toRadians(90));
 
     private final Pose motifPos = new Pose(53, 90, Math.toRadians(85));
 
