@@ -271,6 +271,11 @@ public class BaseStartBlue9Ball extends OpMode {
                         //Gets the value of the motif
                         motif = getMotif();
 
+                        if(motif.isEmpty())
+                        {
+                            currentState = STATES.DONE;
+                        }
+
                         //Lets the robot know to start shooting
                         driveStates = DRIVESTATES.SHOOT;
 
