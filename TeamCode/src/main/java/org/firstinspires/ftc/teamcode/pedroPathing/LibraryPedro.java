@@ -138,7 +138,7 @@ public class LibraryPedro
     }
     public void IntakeStart()
     {
-        intake.setPower(0.9);
+        intake.setPower(1);
         ball = 0;
         wasBallPresent = false;
         intakeTimer.resetTimer();
@@ -155,12 +155,13 @@ public class LibraryPedro
         }
             carTimer.resetTimer();
             carousel.setPower(0);
+
     }
     public void finishIntake()//called in the loop function, continously checks
     {
         if(isIntaking)
         {
-            if(ball >= 2 || intakeTimer.getElapsedTimeSeconds()>5)//if ball count is 2 stop intaking
+            if(intakeTimer.getElapsedTimeSeconds()>7)//if ball count is 2 stop intaking
             {
                 intake.setPower(0);
                 carousel.setPower(0.0);

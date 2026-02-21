@@ -69,7 +69,7 @@ public class BaseStartBluePedro6Ball extends OpMode
                 .setLinearHeadingInterpolation(Math.toRadians(145), Math.toRadians(75))
 
                 .addPath(new BezierLine(new Pose(41.313, 101.8685), new Pose(41.313, 101.868)))
-                        .setLinearHeadingInterpolation(Math.toRadians(75), Math.toRadians(145))
+                        .setLinearHeadingInterpolation(Math.toRadians(75), Math.toRadians(155))
                 .build();
 
         collect11 = follower.pathBuilder().addPath(
@@ -78,7 +78,7 @@ public class BaseStartBluePedro6Ball extends OpMode
                                 new Pose(50.296, 93.911),
                                 new Pose(44.795, 82.364)
                         )
-                ).setLinearHeadingInterpolation(Math.toRadians(145), Math.toRadians(180))
+                ).setLinearHeadingInterpolation(Math.toRadians(155), Math.toRadians(180))
 
                 .build();
 
@@ -137,7 +137,7 @@ public class BaseStartBluePedro6Ball extends OpMode
             case 2:
                 if(!lib.getIsOrdering() && pathTimer.getElapsedTimeSeconds()>0.5)
                 {
-                    lib.shootThree(1150);
+                    lib.shootThree(1200);
                     setPathState(3);
                 }
                 break;
@@ -146,6 +146,11 @@ public class BaseStartBluePedro6Ball extends OpMode
                 if(!follower.isBusy() && !lib.isShooting && pathTimer.getElapsedTimeSeconds()>3)
                 {
                         lib.rampDown();
+                        while(magSwitch.getState())
+                        {
+                            carousel.setPower(0.2);
+                        }
+                        carousel.setPower(0);
                         follower.followPath(collect11,1, true);//infront of row 1 to intake
                         lib.IntakeStart();//starts intake
                         setPathState(4);//moves onto next path
@@ -154,26 +159,30 @@ public class BaseStartBluePedro6Ball extends OpMode
             case 4:
                 if(!follower.isBusy() && pathTimer.getElapsedTimeSeconds()>2 )//checks if it stopped following previous path, checks if its been at leat 0.5 seconds
                 {
-                    follower.followPath(collect12, 0.5, true);
+                    follower.followPath(collect12, 0.4, true);
                     setPathState(5);
                 }
                 break;
             case 5:
                 if(!follower.isBusy() && !lib.isIntaking && pathTimer.getElapsedTimeSeconds()>5)
                 {
+                    while(magSwitch.getState())
+                    {
+                        carousel.setPower(-0.2);
+                    }
+                    carousel.setPower(0);
                     actionTimer.resetTimer();
-                    lib.rampDown();
                     lib.rampUp();
 
                     follower.followPath(collect1SP, true);
-                        setPathState(5);
+                        setPathState(6);
                 }
 
                 break;
             case 6:
                 if(!follower.isBusy())
                 {
-//                    lib.orderBalls(currMotif, "gpp");
+                    lib.orderBalls(currMotif, "gpp");
                     lib.shootThree(1200);
                     setPathState(7);
                 }
