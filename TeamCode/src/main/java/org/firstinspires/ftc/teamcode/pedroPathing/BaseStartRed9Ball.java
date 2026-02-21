@@ -286,7 +286,7 @@ public class BaseStartRed9Ball extends OpMode
             case 4:
                 if(!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 2)//checks if it stopped following previous path, checks if its been at leat 0.5 seconds
                 {
-                    follower.followPath(collectFirstRow, 0.3, true);
+                    follower.followPath(collectFirstRow, 0.5, true);
                     setPathState(5);
                 }
                 break;
@@ -423,7 +423,8 @@ public class BaseStartRed9Ball extends OpMode
         lib.finishIntake();
         if(lib.isIntaking)
         {
-            if(lib.isBall()) {
+            if(lib.isBall())
+            {
                 lib.carouselStart();
             }
             carousel.setPower(0);
