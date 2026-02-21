@@ -183,16 +183,7 @@ public class BaseStartRed9Ball extends OpMode
         secondShot = follower.pathBuilder().addPath(
                         new BezierLine(
                                 new Pose(125.000, 61.000),
-                                new Pose(83.00, 73.00)
-                        )
-                ).setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0))
-
-                .build();
-
-        middlePoint = follower.pathBuilder().addPath(
-                        new BezierLine(
-                                new Pose(83.00, 73.00),
-                                new Pose(105.000, 105.00)
+                                new Pose(105, 105)
                         )
                 ).setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(45))
 
@@ -202,7 +193,7 @@ public class BaseStartRed9Ball extends OpMode
                         new BezierLine(
                                 new Pose(105, 105),
 
-                                new Pose(96.000, 80.000)
+                                new Pose(96.000, 85)
                         )
                 ).setLinearHeadingInterpolation(Math.toRadians(45), Math.toRadians(0))
 
@@ -210,9 +201,9 @@ public class BaseStartRed9Ball extends OpMode
 
         collectSecondRow = follower.pathBuilder().addPath(
                         new BezierLine(
-                                new Pose(96.000, 80.000),
+                                new Pose(96.000, 85),
 
-                                new Pose(125.000, 80.000)
+                                new Pose(125.000, 85)
                         )
                 ).setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0))
 
@@ -220,16 +211,16 @@ public class BaseStartRed9Ball extends OpMode
 
         thirdShot = follower.pathBuilder().addPath(
                         new BezierLine(
-                                new Pose(125.000, 80.000),
+                                new Pose(125.000, 85),
 
-                                new Pose(96.000, 95.500)
+                                new Pose(105, 105)
                         )
                 ).setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(45))
 
                 .build();
         EndPosition =  follower.pathBuilder().addPath(
                         new BezierLine(
-                                new Pose(96.000, 95.5),
+                                new Pose(105, 105),
 
                                 new Pose(125.000, 61)
                         )
@@ -278,7 +269,7 @@ public class BaseStartRed9Ball extends OpMode
                     }
                     carousel.setPower(0);
                     lib.rampDown();
-                    follower.followPath(moveFirstRow,1, true);//infront of row 1 to intake
+                    follower.followPath(moveSecondRow,1, true);//infront of row 1 to intake
                     lib.IntakeStart();//starts intake
                     setPathState(4);//moves onto next path
                 }
@@ -286,7 +277,7 @@ public class BaseStartRed9Ball extends OpMode
             case 4:
                 if(!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 2)//checks if it stopped following previous path, checks if its been at leat 0.5 seconds
                 {
-                    follower.followPath(collectFirstRow, 0.5, true);
+                    follower.followPath(collectSecondRow, 0.5, true);
                     setPathState(5);
                 }
                 break;
@@ -295,9 +286,8 @@ public class BaseStartRed9Ball extends OpMode
                 {
                     actionTimer.resetTimer();
                     lib.rampUp();
-                    follower.followPath(middlePoint);
-                    lib.orderBalls(currMotif, "pgp");
-                    follower.followPath(secondShot, true);
+                    lib.orderBalls(currMotif, "gpp");
+                    follower.followPath(thirdShot, true);
 
                     setPathState(6);
                 }
@@ -313,7 +303,7 @@ public class BaseStartRed9Ball extends OpMode
                 if(!follower.isBusy() && !lib.isShooting && pathTimer.getElapsedTimeSeconds() > 3)
                 {
                     lib.rampDown();
-                    follower.followPath(moveSecondRow, 1, true);
+                    follower.followPath(moveFirstRow, 1, true);
                     lib.IntakeStart();
                     setPathState(8);
                 }
@@ -321,7 +311,7 @@ public class BaseStartRed9Ball extends OpMode
             case 8:
                 if(!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 2)//checks if it stopped following previous path, checks if its been at leat 0.5 seconds
                 {
-                    follower.followPath(collectSecondRow, 0.5, true);
+                    follower.followPath(collectFirstRow, 0.5, true);
                     setPathState(9);
                 }
                 break;
@@ -329,7 +319,7 @@ public class BaseStartRed9Ball extends OpMode
                 if(!follower.isBusy())
                 {
                     lib.orderBalls(currMotif, "gpp");
-                    follower.followPath(thirdShot,true);
+                    follower.followPath(secondShot,true);
                     setPathState(10);
                 }
                 break;
