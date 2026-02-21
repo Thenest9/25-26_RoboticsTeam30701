@@ -218,7 +218,7 @@ public class BaseStartRed9Ball extends OpMode
                 ).setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(45))
 
                 .build();
-        EndPosition = collectFirstRow = follower.pathBuilder().addPath(
+        EndPosition =  follower.pathBuilder().addPath(
                         new BezierLine(
                                 new Pose(96.000, 95.5),
 
@@ -254,7 +254,7 @@ public class BaseStartRed9Ball extends OpMode
             case 2:
                 if(!follower.isBusy())
                 {
-                    lib.shootThree(1100);
+                    lib.shootThree(1150);
                     setPathState(3);
                 }
 
@@ -319,7 +319,7 @@ public class BaseStartRed9Ball extends OpMode
                 if(!follower.isBusy())
                 {
                     lib.orderBalls(currMotif, "gpp");
-                    follower.followPath(thirdShot, 1, true);
+                    follower.followPath(thirdShot,true);
                     setPathState(10);
                 }
                 break;
