@@ -290,29 +290,6 @@ public class LibraryPedro
         //The blue value for nothing there is 137 - 139
         return "n";
     }
-    public void runTogether(Runnable run1, Runnable run2)
-    {
-        //2 thread objects that run the 2 tasks
-        Thread moveGoal = new Thread(run1);
-        Thread orderBalls = new Thread(run2);
-
-        //Starts both of the threads
-        moveGoal.start();
-        orderBalls.start();
-
-        //Joins the 2 threads back to the main thread
-        try
-        {
-            moveGoal.join();
-            orderBalls.join();
-        }
-        //If they have an error, it passes a error in the log
-        catch (InterruptedException e)
-        {
-            telemetry.addData("Joining Threads: ", "Failed");
-            telemetry.update();
-        }
-    }
     public void orderBalls(String motif, String order)
     {
         //Moves the gate to the front area of the carousel, the values are absolute
