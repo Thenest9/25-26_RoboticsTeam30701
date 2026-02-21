@@ -204,7 +204,7 @@ public class LibraryPedro
     {
         if (isShooting)
         {
-            if(shootTimer.getElapsedTimeSeconds() > 2.67)
+            if(shootTimer.getElapsedTimeSeconds() > 2)
             {
                 carousel.setPower(0);
                 outputLeft.setVelocity(0);

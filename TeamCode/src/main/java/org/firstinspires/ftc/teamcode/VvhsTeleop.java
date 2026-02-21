@@ -98,7 +98,7 @@ public class VvhsTeleop extends LinearOpMode {
         touchSensorTop.setMode(DigitalChannel.Mode.INPUT);
 
 
-        touchSensorBot = hardwareMap.get(DigitalChannel.class, "touchSensorDown");
+        touchSensorBot = hardwareMap.get(DigitalChannel.class, "touchSensorBot");
         touchSensorBot.setMode(DigitalChannel.Mode.INPUT);
 
         Library lib = new Library(FrontLeft, FrontRight, RearLeft, RearRight, this, outputRight, outputLeft, carousel, telemetry, limelight, intake, ramp, gate,colorSensor);
