@@ -133,6 +133,7 @@ public class BaseStartRed9Ball extends OpMode
     public PathChain collectSecondRow;
     public PathChain thirdShot;
     public PathChain EndPosition;
+    public PathChain middlePoint;
 
     public String currMotif = ""; // Motif
 
@@ -161,9 +162,9 @@ public class BaseStartRed9Ball extends OpMode
 
         moveFirstRow = follower.pathBuilder().addPath(
                         new BezierLine(
-                                new Pose(105, 105),
+                                new Pose(105.000, 105.000),
 
-                                new Pose(96.000, 61)
+                                new Pose(96.000, 61.000)
                         )
                 ).setLinearHeadingInterpolation(Math.toRadians(45), Math.toRadians(0))
 
@@ -171,19 +172,27 @@ public class BaseStartRed9Ball extends OpMode
 
         collectFirstRow = follower.pathBuilder().addPath(
                         new BezierLine(
-                                new Pose(96.000, 61),
+                                new Pose(96.000, 61.000),
 
-                                new Pose(125.000, 61)
+                                new Pose(125.000, 61.000)
                         )
                 ).setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0))
 
                 .build();
 
         secondShot = follower.pathBuilder().addPath(
-                        new BezierCurve(
-                                new Pose(125.000, 61),
-                                new Pose(96.000, 56.012),
-                                new Pose(105, 105)
+                        new BezierLine(
+                                new Pose(125.000, 61.000),
+                                new Pose(83.00, 73.00)
+                        )
+                ).setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0))
+
+                .build();
+
+        middlePoint = follower.pathBuilder().addPath(
+                        new BezierLine(
+                                new Pose(83.00, 73.00),
+                                new Pose(105.000, 105.00)
                         )
                 ).setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(45))
 
@@ -277,7 +286,7 @@ public class BaseStartRed9Ball extends OpMode
             case 4:
                 if(!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 2)//checks if it stopped following previous path, checks if its been at leat 0.5 seconds
                 {
-                    follower.followPath(collectFirstRow, 0.5, true);
+                    follower.followPath(collectFirstRow, 0.3, true);
                     setPathState(5);
                 }
                 break;
@@ -286,6 +295,7 @@ public class BaseStartRed9Ball extends OpMode
                 {
                     actionTimer.resetTimer();
                     lib.rampUp();
+                    follower.followPath(middlePoint);
                     lib.orderBalls(currMotif, "pgp");
                     follower.followPath(secondShot, true);
 

@@ -138,7 +138,7 @@ public class LibraryPedro
     }
     public void IntakeStart()
     {
-        intake.setPower(0.9);
+        intake.setPower(1);
         ball = 0;
         wasBallPresent = false;
         intakeTimer.resetTimer();
@@ -150,7 +150,7 @@ public class LibraryPedro
         carTimer.resetTimer();
         while(magneticLimitSwitch.getState())
         {
-            carousel.setPower(0.4);
+            carousel.setPower(0.3);
             isCarMoving = true;
         }
         carTimer.resetTimer();
