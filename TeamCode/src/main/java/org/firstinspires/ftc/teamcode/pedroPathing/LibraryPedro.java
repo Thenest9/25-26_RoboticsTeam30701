@@ -105,6 +105,9 @@ public class LibraryPedro
 
     }
 
+    public LibraryPedro(DcMotorEx outputRight, DcMotorEx outputLeft, CRServo carousel, Telemetry telemetry, Limelight3A limelight, DcMotor intake, DcMotor ramp, Servo gate, ColorSensor colorSensor, DigitalChannel touchSensorTop, DigitalChannel touchSensorBot) {
+    }
+
     public double getShootTimer()
     {
         return shootTimer.getElapsedTimeSeconds();
@@ -202,7 +205,7 @@ public class LibraryPedro
     {
         if (isShooting)
         {
-            if(shootTimer.getElapsedTimeSeconds() > 2.67)
+            if(shootTimer.getElapsedTimeSeconds() > 2)
             {
                 carousel.setPower(0);
                 outputLeft.setVelocity(0);
