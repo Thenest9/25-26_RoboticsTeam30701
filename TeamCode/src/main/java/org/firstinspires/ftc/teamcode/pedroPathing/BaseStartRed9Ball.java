@@ -132,6 +132,7 @@ public class BaseStartRed9Ball extends OpMode
     public PathChain moveSecondRow;
     public PathChain collectSecondRow;
     public PathChain thirdShot;
+    public PathChain EndPosition;
 
     public String currMotif = ""; // Motif
 
@@ -151,18 +152,18 @@ public class BaseStartRed9Ball extends OpMode
         firstShot = follower.pathBuilder()
                 .addPath(
                         new BezierLine(
-                                new Pose(96.000, 95.000),
-                                new Pose(96.000, 95.000)
+                                new Pose(96, 95),
+                                new Pose(105, 105)
                         )
                 )
-                .setLinearHeadingInterpolation(Math.toRadians(45), Math.toRadians(45))
+                .setLinearHeadingInterpolation(Math.toRadians(115), Math.toRadians(45))
                 .build();
 
         moveFirstRow = follower.pathBuilder().addPath(
                         new BezierLine(
-                                new Pose(96.000, 95.500),
+                                new Pose(105, 105),
 
-                                new Pose(96.000, 56.000)
+                                new Pose(96.000, 61)
                         )
                 ).setLinearHeadingInterpolation(Math.toRadians(45), Math.toRadians(0))
 
@@ -170,9 +171,9 @@ public class BaseStartRed9Ball extends OpMode
 
         collectFirstRow = follower.pathBuilder().addPath(
                         new BezierLine(
-                                new Pose(96.000, 56.000),
+                                new Pose(96.000, 61),
 
-                                new Pose(125.000, 56.000)
+                                new Pose(125.000, 61)
                         )
                 ).setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0))
 
@@ -180,9 +181,9 @@ public class BaseStartRed9Ball extends OpMode
 
         secondShot = follower.pathBuilder().addPath(
                         new BezierCurve(
-                                new Pose(125.000, 56.000),
+                                new Pose(125.000, 61),
                                 new Pose(96.000, 56.012),
-                                new Pose(96.000, 95.500)
+                                new Pose(105, 105)
                         )
                 ).setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(45))
 
@@ -190,7 +191,7 @@ public class BaseStartRed9Ball extends OpMode
 
         moveSecondRow = follower.pathBuilder().addPath(
                         new BezierLine(
-                                new Pose(96.000, 95.500),
+                                new Pose(105, 105),
 
                                 new Pose(96.000, 80.000)
                         )
@@ -217,6 +218,15 @@ public class BaseStartRed9Ball extends OpMode
                 ).setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(45))
 
                 .build();
+        EndPosition = collectFirstRow = follower.pathBuilder().addPath(
+                        new BezierLine(
+                                new Pose(96.000, 95.5),
+
+                                new Pose(125.000, 61)
+                        )
+                ).setLinearHeadingInterpolation(Math.toRadians(45), Math.toRadians(0))
+
+                .build();
     }
 
     public void autonomousPathUpdate()
@@ -237,21 +247,27 @@ public class BaseStartRed9Ball extends OpMode
                 {
                     //Order balls, then case 2, shoot, then case 3, stop and move one
                     lib.orderBalls(currMotif, "ppg");
+                    follower.followPath(firstShot);
                     setPathState(2);
                 }
                 break;
             case 2:
-                if(!lib.getIsOrdering() && pathTimer.getElapsedTimeSeconds()>0.5)
+                if(!follower.isBusy())
                 {
-                    follower.followPath(firstShot);
-                    lib.shootThree(1200);
+                    lib.shootThree(1100);
                     setPathState(3);
                 }
+
                 break;
 
             case 3://move to be infront of balls
                 if(!follower.isBusy() && !lib.isShooting && pathTimer.getElapsedTimeSeconds() > 3)
                 {
+                    while(magSwitch.getState())
+                    {
+                        carousel.setPower(0.2);
+                    }
+                    carousel.setPower(0);
                     lib.rampDown();
                     follower.followPath(moveFirstRow,1, true);//infront of row 1 to intake
                     lib.IntakeStart();//starts intake
@@ -270,7 +286,7 @@ public class BaseStartRed9Ball extends OpMode
                 {
                     actionTimer.resetTimer();
                     lib.rampUp();
-                    lib.orderBalls(currMotif, "gpp");
+                    lib.orderBalls(currMotif, "pgp");
                     follower.followPath(secondShot, true);
 
                     setPathState(6);
@@ -279,7 +295,7 @@ public class BaseStartRed9Ball extends OpMode
             case 6:
                 if(!follower.isBusy())
                 {
-                    lib.shootThree(1200);
+                    lib.shootThree(1150);
                     setPathState(7);
                 }
                 break;
@@ -302,7 +318,7 @@ public class BaseStartRed9Ball extends OpMode
             case 9:
                 if(!follower.isBusy())
                 {
-                    lib.orderBalls(currMotif, "pgp");
+                    lib.orderBalls(currMotif, "gpp");
                     follower.followPath(thirdShot, 1, true);
                     setPathState(10);
                 }
@@ -310,9 +326,15 @@ public class BaseStartRed9Ball extends OpMode
             case 10:
                 if(!follower.isBusy())
                 {
-                    lib.shootThree(1200);
+                    lib.shootThree(1150);
+                    setPathState(11);
                 }
             break;
+            case 11:
+                if(!lib.isShooting)
+                {
+                    follower.followPath(EndPosition);
+                }
         }
     }
     public void setPathState(int pState) {
